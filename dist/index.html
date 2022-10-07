@@ -7,6 +7,120 @@
     <title>Odin Project - Weather App</title>
 </head>
 <body>
-    <script src="bundle.js"></script>
+    <script defer src="bundle.js"></script>
+
+    <header>
+        <h1>Weather App</h1>
+    </header>
+    <nav id="topnav">
+        <form accept="" method="get">
+            <label>
+                <span>Enter location: </span>
+                <input type="search" name="search" autofocus required>
+            </label>
+            <input type="submit">
+        </form>
+    </nav>
+    <main>
+        <h2>
+            <span id="name"></span>, <span id="sys-country"></span>
+        </h2>
+        <hr>
+        <article id="coords">
+            <h2>Coordinates</h2>
+            <section>
+                <span>Long: </span>
+                <span id="coord-lon"></span>
+            </section>
+            <section>
+                <span>Lat: </span>
+                <span id="coord-lat"></span>
+            </section>
+        </article>
+        <hr>
+        <article>
+            <h2>Weather</h2>
+            <section>
+                <span>ID: </span>
+                <span id="weather-id"></span>
+            </section>
+            <section>
+                <span>Main: </span>
+                <span id="weather-main"></span>
+            </section>
+            <section>
+                <span>Description: </span>
+                <span id="weather-description"></span>
+            </section>
+            <section>
+                <span>Icon: </span>
+                <span id="weather-icon"></span>
+            </section>
+        </article>
+        <hr>
+        <article>
+            <h2>Main</h2>
+            <section>
+                <span>Temperature: </span>
+                <span id="main-temp"></span>
+            </section>
+            <section>
+                <span>Feels Like: </span>
+                <span id="main-feels-like"></span>
+            </section>
+            <section>
+                <span>Pressure: </span>
+                <span id="main-pressure"></span>
+                hPa
+            </section>
+            <section>
+                <span>Humidity: </span>
+                <span id="main-humidity"></span>
+            </section>
+            <section>
+                <span>Minimum Temp: </span>
+                <span id="main-temp-min"></span>
+            </section>
+            <section>
+                <span>Maximum Temp: </span>
+                <span id="main-temp-max"></span>
+            </section>
+            <section>
+                <span>Atmospheric pressure on the sea level: </span>
+                <span id="main-sea-level"></span>
+                hPa
+            </section>
+            <section>
+                <span>Atmospheric pressure on the ground level: </span>
+                <span id="main-grnd-level"></span>
+                hPa
+            </section>
+        </article>
+        <hr>
+        <article>
+            <h2>Sys</h2>
+            <section>
+                <span>Type: </span>
+                <span id="sys-type"></span>
+            </section>
+            <section>
+                <span>ID: </span>
+                <span id="sys-id"></span>
+            </section>
+            <section>
+                <span>Message: </span>
+                <span id="sys-message"></span>
+            </section>
+            <section>
+                <span>Sunrise: </span>
+                <span id="sys-sunrise"></span>
+            </section>
+            <section>
+                <span>Sunset: </span>
+                <span id="sys-sunset"></span>
+            </section>
+        </article>
+    </main>
+    <footer>Footer</footer>
 </body>
 </html>
