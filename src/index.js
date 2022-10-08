@@ -1,11 +1,66 @@
-//import { createElement } from './utilities';
 import './meyerReset.scss';
 import './styles.scss';
+import { createElement } from './utilities';
+import FooterComponent from './footerComponent';
 
 (() => {
     const openWeatherMapKey = '4e7cceafee56ebb58f598a6cdad1a909';
     const mainElement = document.querySelector('main');
     const searchForm = document.querySelector('#topnav form');
+    const TemperatureUnits = {
+        standard: {
+            key: null,
+            name: 'Kelvin',
+            postfix: 'K',
+        },
+        metric: {
+            key: 'metric',
+            name: 'Celsius',
+            postfix: 'C',
+        },
+        imperial: {
+            key: 'imperial',
+            name: 'Fahrenheit',
+            postfix: 'F',
+        },
+    };
+
+    let temperatureUnit = TemperatureUnits.imperial;
+
+    class WeatherProperty {
+        constructor(label, defaultValue = '', postfix = '') {
+            this.label = label;
+            this.defaultValue = defaultValue;
+            this.value = defaultValue;
+            this.postfix = postfix;
+            this.createElement();
+        }
+
+        set value(newValue) {
+            if (newValue === this.value) { return; }
+
+            this.value = newValue;
+        }
+
+        get value() {
+            return this.value;
+        }
+
+        createElement() {
+            this.element = document.createElement('section');
+            this.element.append(
+                createElement('span', {}, `${label}: `),
+                createElement('span', {id: ''})
+            );
+            return this.element;
+        }
+    }
+
+    function createFetchURL(searchInputValue) {
+        let url = `http://api.openweathermap.org/data/2.5/weather?q=${searchInputValue}&APPID=${openWeatherMapKey}`;
+
+        return url;
+    }
 
     function setTextContentOnElement(element, textContent) {
         if (element) {
@@ -93,7 +148,7 @@ import './styles.scss';
 
             const searchInput = e.target.querySelector('[name="search"]');
             if (searchInput) {
-                fetch(`http://api.openweathermap.org/data/2.5/weather?q=${searchInput.value}&APPID=${openWeatherMapKey}`, {mode: 'cors',})
+                fetch(createFetchURL(searchInput.value), {mode: 'cors',})
                     .then((response) => response.json())
                     .then((data) => {
                         console.log(data);
@@ -102,4 +157,9 @@ import './styles.scss';
             }
         }, false);
     }
+
+    // Footer Component
+    mainElement.appendChild(
+        new FooterComponent(2022).render()
+    );
 })();
