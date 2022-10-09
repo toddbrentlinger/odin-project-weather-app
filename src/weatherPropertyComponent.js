@@ -16,6 +16,7 @@ export default class WeatherPropertyComponent extends BaseComponent {
         if (newPostfix === this._postfix) { return; }
 
         this._postfix = newPostfix;
+        this.render();
     }
 
     get postfix() { return this._postfix; }
@@ -24,12 +25,13 @@ export default class WeatherPropertyComponent extends BaseComponent {
         if (newValue === this._value) { return; }
 
         this._value = newValue;
+        this.render();
     }
 
     get value() { return this._value; }
 
     render() {
-        this._element = document.createElement('section');
+        this.initializeRender(document.createElement('section'));
 
         this._element.append(
             createElement('span', {}, `${this._label}: `),

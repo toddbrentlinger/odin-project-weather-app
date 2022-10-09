@@ -1,63 +1,69 @@
 import './meyerReset.scss';
 import './styles.scss';
-import { createElement } from './utilities';
 import FooterComponent from './footerComponent';
 
-(() => {
+const weatherApp = (() => {
     const openWeatherMapKey = '4e7cceafee56ebb58f598a6cdad1a909';
     const mainElement = document.querySelector('main');
     const searchForm = document.querySelector('#topnav form');
     const TemperatureUnits = {
         standard: {
             key: null,
-            name: 'Kelvin',
-            postfix: 'K',
+            temperature: {
+                name: 'Kelvin',
+                abbreviation: 'K',
+            },
+            speed: {
+                name: 'meters per second',
+                abbreviation: 'm/s',
+            },
         },
         metric: {
             key: 'metric',
-            name: 'Celsius',
-            postfix: 'C',
+            temperature: {
+                name: 'Celsius',
+                abbreviation: 'C',
+            },
+            speed: {
+                name: 'meters per second',
+                abbreviation: 'm/s',
+            },
         },
         imperial: {
             key: 'imperial',
-            name: 'Fahrenheit',
-            postfix: 'F',
+            temperature: {
+                name: 'Fahrenheit',
+                abbreviation: 'F',
+            },
+            speed: {
+                name: 'miles per hour',
+                abbreviation: 'mph',
+            },
         },
     };
 
     let temperatureUnit = TemperatureUnits.imperial;
 
-    class WeatherProperty {
-        constructor(label, defaultValue = '', postfix = '') {
-            this.label = label;
-            this.defaultValue = defaultValue;
-            this.value = defaultValue;
-            this.postfix = postfix;
-            this.createElement();
+    function setTemperatureUnit(newTemperatureUnit) {
+        // Check if valid temperature unit
+        const bIsValid = Object.values(TemperatureUnits).some(
+            item => item === newTemperatureUnit
+        );
+        // Check if the same temperature unit
+        if (!bIsValid || temperatureUnit === newTemperatureUnit) {
+            return;
         }
 
-        set value(newValue) {
-            if (newValue === this.value) { return; }
-
-            this.value = newValue;
-        }
-
-        get value() {
-            return this.value;
-        }
-
-        createElement() {
-            this.element = document.createElement('section');
-            this.element.append(
-                createElement('span', {}, `${label}: `),
-                createElement('span', {id: ''})
-            );
-            return this.element;
-        }
+        temperatureUnit = newTemperatureUnit;
     }
 
     function createFetchURL(searchInputValue) {
+        debugger;
         let url = `http://api.openweathermap.org/data/2.5/weather?q=${searchInputValue}&APPID=${openWeatherMapKey}`;
+
+        if (temperatureUnit.key) {
+            url += `&units=${temperatureUnit.key}`;
+        }
 
         return url;
     }
@@ -142,24 +148,33 @@ import FooterComponent from './footerComponent';
         }
     }
     
-    if (searchForm) {
-        searchForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-
-            const searchInput = e.target.querySelector('[name="search"]');
-            if (searchInput) {
-                fetch(createFetchURL(searchInput.value), {mode: 'cors',})
-                    .then((response) => response.json())
-                    .then((data) => {
-                        console.log(data);
-                        displayWeatherData(data);
-                    });
-            }
-        }, false);
+    function init() {
+        // Search form submit handler
+        if (searchForm) {
+            searchForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+    
+                const searchInput = e.target.querySelector('[name="search"]');
+                if (searchInput) {
+                    fetch(createFetchURL(searchInput.value), {mode: 'cors',})
+                        .then((response) => response.json())
+                        .then((data) => {
+                            console.log(data);
+                            displayWeatherData(data);
+                        });
+                }
+            }, false);
+        }
+    
+        // Footer Component
+        mainElement.appendChild(
+            new FooterComponent(2022).render()
+        );
     }
 
-    // Footer Component
-    mainElement.appendChild(
-        new FooterComponent(2022).render()
-    );
+    return {
+        init,
+    };
 })();
+
+weatherApp.init();
