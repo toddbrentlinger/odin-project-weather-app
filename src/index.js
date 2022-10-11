@@ -22,7 +22,7 @@ const weatherApp = (() => {
             key: 'metric',
             temperature: {
                 name: 'Celsius',
-                abbreviation: 'C',
+                abbreviation: '\xB0C',
             },
             speed: {
                 name: 'meters per second',
@@ -33,7 +33,7 @@ const weatherApp = (() => {
             key: 'imperial',
             temperature: {
                 name: 'Fahrenheit',
-                abbreviation: 'F',
+                abbreviation: '\xB0F',
             },
             speed: {
                 name: 'miles per hour',
@@ -58,7 +58,6 @@ const weatherApp = (() => {
     }
 
     function createFetchURL(searchInputValue) {
-        debugger;
         let url = `http://api.openweathermap.org/data/2.5/weather?q=${searchInputValue}&APPID=${openWeatherMapKey}`;
 
         if (temperatureUnit.key) {
@@ -74,9 +73,17 @@ const weatherApp = (() => {
         }
     }
 
+    function convertUnixTimestampToDate(unixTimestamp) {
+        return new Date(unixTimestamp * 1000).toLocaleTimeString();
+    }
+
     function displayWeatherData(weatherData) {
         // Name
-        setTextContentOnElement(document.getElementById('name'), weatherData.name);
+        let cityName = weatherData.name;
+        if ('sys' in weatherData && 'country' in weatherData.sys) {
+            cityName += `, ${weatherData.sys.country}`;
+        }
+        setTextContentOnElement(document.getElementById('name'), cityName);
 
         // Coords
         if ('coord' in weatherData) {
@@ -85,21 +92,48 @@ const weatherApp = (() => {
         }
 
         // Weather
-        if ('weather' in weatherData) {
+        if ('weather' in weatherData && weatherData.weather.length) {
             setTextContentOnElement(document.getElementById('weather-id'), weatherData.weather[0].id);
             setTextContentOnElement(document.getElementById('weather-main'), weatherData.weather[0].main);
             setTextContentOnElement(document.getElementById('weather-description'), weatherData.weather[0].description);
-            setTextContentOnElement(document.getElementById('weather-icon'), weatherData.weather[0].icon);
+
+            // Icon
+            const iconId = weatherData.weather[0].icon;
+            const weatherIconElement = document.getElementById('weather-icon');
+            if (iconId && weatherIconElement) {
+                weatherIconElement.src = `http://openweathermap.org/img/wn/${iconId}@2x.png`;
+            }
         }
 
         // Main
         if ('main' in weatherData) {
-            setTextContentOnElement(document.getElementById('main-temp'), weatherData.main.temp);
-            setTextContentOnElement(document.getElementById('main-feels-like'), weatherData.main.feels_like);
+            // Main Temperature
+            setTextContentOnElement(
+                document.getElementById('main-temp'),
+                `${weatherData.main.temp} ${temperatureUnit.temperature.abbreviation}`
+            );
+
+            // Feels Like Temperature
+            setTextContentOnElement(
+                document.getElementById('main-feels-like'),
+                `${weatherData.main.feels_like} ${temperatureUnit.temperature.abbreviation}`
+            );
+
+            // Low Temperature
+            setTextContentOnElement(
+                document.getElementById('main-temp-min'),
+                `${weatherData.main.temp_min} ${temperatureUnit.temperature.abbreviation}`
+            );
+
+            // High Temperature
+            setTextContentOnElement(
+                document.getElementById('main-temp-max'),
+                `${weatherData.main.temp_max} ${temperatureUnit.temperature.abbreviation}` 
+            );
+
             setTextContentOnElement(document.getElementById('main-pressure'), weatherData.main.pressure);
             setTextContentOnElement(document.getElementById('main-humidity'), weatherData.main.humidity);
-            setTextContentOnElement(document.getElementById('main-temp-min'), weatherData.main.temp_min);
-            setTextContentOnElement(document.getElementById('main-temp-max'), weatherData.main.temp_max);
+
             setTextContentOnElement(document.getElementById('main-sea-level'), weatherData.main.sea_level);
             setTextContentOnElement(document.getElementById('main-grnd-level'), weatherData.main.grnd_level);
         }
@@ -132,7 +166,7 @@ const weatherApp = (() => {
         }
 
         // Datetime
-        setTextContentOnElement(document.getElementById('dt'), weatherData.dt);
+        setTextContentOnElement(document.getElementById('dt'), convertUnixTimestampToDate(weatherData.dt));
 
         // Timezone
         setTextContentOnElement(document.getElementById('timezone'), weatherData.timezone);
@@ -142,9 +176,9 @@ const weatherApp = (() => {
             setTextContentOnElement(document.getElementById('sys-type'), weatherData.sys.type);
             setTextContentOnElement(document.getElementById('sys-id'), weatherData.sys.id);
             setTextContentOnElement(document.getElementById('sys-message'), weatherData.sys.message);
-            setTextContentOnElement(document.getElementById('sys-country'), weatherData.sys.country);
-            setTextContentOnElement(document.getElementById('sys-sunrise'), weatherData.sys.sunrise);
-            setTextContentOnElement(document.getElementById('sys-sunset'), weatherData.sys.sunset);
+
+            setTextContentOnElement(document.getElementById('sys-sunrise'), convertUnixTimestampToDate(weatherData.sys.sunrise));
+            setTextContentOnElement(document.getElementById('sys-sunset'), convertUnixTimestampToDate(weatherData.sys.sunset));
         }
     }
     
@@ -160,7 +194,11 @@ const weatherApp = (() => {
                         .then((response) => response.json())
                         .then((data) => {
                             console.log(data);
-                            displayWeatherData(data);
+                            if ('cod' in data && data.cod === 200) {
+                                displayWeatherData(data);
+                            } else {
+                                // Response not valid
+                            }
                         });
                 }
             }, false);
