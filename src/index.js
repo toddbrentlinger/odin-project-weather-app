@@ -1,6 +1,7 @@
 import './meyerReset.scss';
 import './styles.scss';
 import FooterComponent from './footerComponent';
+import { createElement } from './utilities';
 
 const weatherApp = (() => {
     const openWeatherMapKey = '4e7cceafee56ebb58f598a6cdad1a909';
@@ -43,6 +44,31 @@ const weatherApp = (() => {
     };
 
     let temperatureUnit = TemperatureUnits.imperial;
+
+    function createWeatherUnitsSelect() {
+        const formSelectId = 'weather-units-select';
+        const labelElement = createElement(
+            'label', 
+            {'for': formSelectId},
+            createElement('span', {}, 'Units: ')
+        );
+
+        const selectElement = labelElement.appendChild(
+            createElement('select', {name: 'units', id: formSelectId, required: true})
+        );
+
+        selectElement.append(
+            Object.entries(TemperatureUnits).map((key, tempObj) => {
+                createElement(
+                    'input', 
+                    {value: key}, 
+                    `${tempObj.key.toUpperCase()} (${tempObj.temperature.abbreviation}, ${tempObj.speed.abbreviation})`
+                )
+            })
+        );
+
+        return labelElement;
+    }
 
     function setTemperatureUnit(newTemperatureUnit) {
         // Check if valid temperature unit
@@ -189,11 +215,18 @@ const weatherApp = (() => {
                 e.preventDefault();
     
                 const searchInput = e.target.querySelector('[name="search"]');
+                const unitsSelect = e.target.querySelector('[name="units"]');
+
+                if (unitsSelect) {
+                    setTemperatureUnit(TemperatureUnits[unitsSelect.value]);
+                }
+
                 if (searchInput) {
                     fetch(createFetchURL(searchInput.value), {mode: 'cors',})
                         .then((response) => response.json())
                         .then((data) => {
                             console.log(data);
+                            // Display weather data if response is valid
                             if ('cod' in data && data.cod === 200) {
                                 displayWeatherData(data);
                             } else {
@@ -206,7 +239,8 @@ const weatherApp = (() => {
     
         // Footer Component
         mainElement.appendChild(
-            new FooterComponent(2022).render()
+            new FooterComponent(2022, 'https://github.com/toddbrentlinger/odin-project-weather-app')
+                .render()
         );
     }
 

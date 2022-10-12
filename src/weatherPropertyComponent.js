@@ -2,7 +2,7 @@ import BaseComponent from './baseComponent';
 import { createElement } from './utilities';
 
 export default class WeatherPropertyComponent extends BaseComponent {
-    constructor(label, id, postfix = '', defaultValue = '') {
+    constructor(label, id, postfix = '', defaultValue = '-') {
         super();
         this._label = label;
         this._id = id;

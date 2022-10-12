@@ -14,9 +14,17 @@
     </header>
     <nav id="topnav">
         <form accept="" method="get">
-            <label>
+            <label for="weather-search">
                 <span>Enter location: </span>
-                <input type="search" name="search" autofocus required>
+                <input type="search" name="search" id="weather-search" autofocus required>
+            </label>
+            <label for="weather-units-select">
+                <span>Units: </span>
+                <select name="units" id="weather-units-select" required>
+                    <option value="standard">Standard (K, m/s)</option>
+                    <option value="metric">Metric (\xB0C, m/s)</option>
+                    <option value="imperial">Imperial (\xB0F, mph)</option>
+                </select>
             </label>
             <input type="submit">
         </form>
