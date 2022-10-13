@@ -22,8 +22,8 @@
                 <span>Units: </span>
                 <select name="units" id="weather-units-select" required>
                     <option value="standard">Standard (K, m/s)</option>
-                    <option value="metric">Metric (\xB0C, m/s)</option>
-                    <option value="imperial">Imperial (\xB0F, mph)</option>
+                    <option value="metric">Metric (&deg;C, m/s)</option>
+                    <option value="imperial">Imperial (&deg;F, mph)</option>
                 </select>
             </label>
             <input type="submit">
@@ -89,7 +89,6 @@
             <section>
                 <span>Pressure: </span>
                 <span id="main-pressure"></span>
-                hPa
             </section>
             <section>
                 <span>Humidity: </span>
@@ -106,12 +105,10 @@
             <section>
                 <span>Atmospheric pressure on the sea level: </span>
                 <span id="main-sea-level"></span>
-                hPa
             </section>
             <section>
                 <span>Atmospheric pressure on the ground level: </span>
                 <span id="main-grnd-level"></span>
-                hPa
             </section>
         </article>
         <hr>
@@ -144,17 +141,14 @@
             <section>
                 <span>Wind Speed: </span>
                 <span id="wind-speed"></span>
-                <span aria-label="meters per second">m/s</span>
             </section>
             <section>
                 <span>Wind Direction: </span>
                 <span id="wind-deg"></span>
-                <span aria-label="degrees">deg</span>
             </section>
             <section>
                 <span>Wind Gust: </span>
                 <span id="wind-gust"></span>
-                <span aria-label="meters per second">m/s</span>
             </section>
         </article>
         <hr>
@@ -163,12 +157,10 @@
             <section>
                 <span>Rain 1H: </span>
                 <span id="rain-1h"></span>
-                <span aria-label="millimeters">mm</span>
             </section>
             <section>
                 <span>Rain 3H: </span>
                 <span id="rain-3h"></span>
-                <span aria-label="millimeters">mm</span>
             </section>
         </article>
         <hr>
@@ -177,12 +169,10 @@
             <section>
                 <span>Snow 1H: </span>
                 <span id="snow-1h"></span>
-                <span aria-label="millimeters">mm</span>
             </section>
             <section>
                 <span>Snow 3H: </span>
                 <span id="snow-3h"></span>
-                <span aria-label="millimeters">mm</span>
             </section>
         </article>
         <hr>
@@ -191,12 +181,10 @@
             <section>
                 <span>Visibility: </span>
                 <span id="visibility"></span>
-                <span aria-label="meters">m</span>
             </section>
             <section>
                 <span>Clouds: </span>
                 <span id="clouds"></span>
-                <span aria-label="percent">%</span>
             </section>
         </article>
     </main>

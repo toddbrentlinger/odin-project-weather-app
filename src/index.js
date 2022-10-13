@@ -2,6 +2,7 @@ import './meyerReset.scss';
 import './styles.scss';
 import FooterComponent from './footerComponent';
 import { createElement } from './utilities';
+import WeatherPropertyComponent from './weatherPropertyComponent';
 
 const weatherApp = (() => {
     const openWeatherMapKey = '4e7cceafee56ebb58f598a6cdad1a909';
@@ -44,6 +45,34 @@ const weatherApp = (() => {
     };
 
     let temperatureUnit = TemperatureUnits.imperial;
+    
+    let weatherPropertyComponents = {
+        name: new WeatherPropertyComponent(null, 'name'),
+        'coord-lon': new WeatherPropertyComponent('Long', 'coord-lon'),
+        'coord-lat': new WeatherPropertyComponent('Lat', 'coord-lat'),
+        'weather-id': new WeatherPropertyComponent('ID', 'weather-id'),
+        'weather-main': new WeatherPropertyComponent('Main', 'weather-main'),
+        'weather-description': new WeatherPropertyComponent('Description', 'weather-description'),
+        'weather-icon': new WeatherPropertyComponent('Icon', 'weather-icon'),
+        // TODO: Add remaining
+    };
+
+    /**
+     * 
+     * @param {String} key 
+     * @param {WeatherPropertyComponent} newWeatherPropertyComponent 
+     */
+    function addWeatherPropertyComponent(key, newWeatherPropertyComponent) {
+        // Check argument types
+
+        // Check if key already exists
+        // ISSUE: Could use to replace existing key with new component
+
+        // Add to weatherPropertyComponents object
+        weatherPropertyComponents[key] = newWeatherPropertyComponent;
+
+        return newWeatherPropertyComponent;
+    }
 
     function createWeatherUnitsSelect() {
         const formSelectId = 'weather-units-select';
@@ -93,9 +122,18 @@ const weatherApp = (() => {
         return url;
     }
 
-    function setTextContentOnElement(element, textContent) {
+    function setTextContentOnElement(element, value, postfix) {
         if (element) {
-            element.textContent = textContent;
+            if (value === undefined) {
+                element.textContent = '-';
+            } else { // Else value !== undefined
+                let textContent = value;
+                if (postfix) {
+                    textContent += ` ${postfix}`;
+                }
+                element.textContent = textContent;
+            }
+           
         }
     }
 
@@ -136,63 +174,124 @@ const weatherApp = (() => {
             // Main Temperature
             setTextContentOnElement(
                 document.getElementById('main-temp'),
-                `${weatherData.main.temp} ${temperatureUnit.temperature.abbreviation}`
+                weatherData.main.temp,
+                temperatureUnit.temperature.abbreviation
             );
 
             // Feels Like Temperature
             setTextContentOnElement(
                 document.getElementById('main-feels-like'),
-                `${weatherData.main.feels_like} ${temperatureUnit.temperature.abbreviation}`
+                weatherData.main.feels_like,
+                temperatureUnit.temperature.abbreviation
             );
 
             // Low Temperature
             setTextContentOnElement(
                 document.getElementById('main-temp-min'),
-                `${weatherData.main.temp_min} ${temperatureUnit.temperature.abbreviation}`
+                weatherData.main.temp_min,
+                temperatureUnit.temperature.abbreviation
             );
 
             // High Temperature
             setTextContentOnElement(
                 document.getElementById('main-temp-max'),
-                `${weatherData.main.temp_max} ${temperatureUnit.temperature.abbreviation}` 
+                weatherData.main.temp_max,
+                temperatureUnit.temperature.abbreviation
             );
 
-            setTextContentOnElement(document.getElementById('main-pressure'), weatherData.main.pressure);
-            setTextContentOnElement(document.getElementById('main-humidity'), weatherData.main.humidity);
+            setTextContentOnElement(
+                document.getElementById('main-pressure'),
+                weatherData.main.pressure,
+                'hPa'
+            );
 
-            setTextContentOnElement(document.getElementById('main-sea-level'), weatherData.main.sea_level);
-            setTextContentOnElement(document.getElementById('main-grnd-level'), weatherData.main.grnd_level);
+            setTextContentOnElement(
+                document.getElementById('main-humidity'),
+                weatherData.main.humidity,
+                '%'
+            );
+
+            setTextContentOnElement(
+                document.getElementById('main-sea-level'), 
+                weatherData.main.sea_level,
+                'hPa'
+            );
+
+            setTextContentOnElement(
+                document.getElementById('main-grnd-level'),
+                weatherData.main.grnd_level,
+                'hPa'
+            );
         }
 
         // Visibility
-        setTextContentOnElement(document.getElementById('visibility'), weatherData.visibility);
+        setTextContentOnElement(
+            document.getElementById('visibility'),
+            weatherData.visibility,
+            'm'
+        );
 
         // Wind
         if ('wind' in weatherData) {
-            setTextContentOnElement(document.getElementById('wind-speed'), weatherData.wind.speed);
-            setTextContentOnElement(document.getElementById('wind-deg'), weatherData.wind.deg);
-            setTextContentOnElement(document.getElementById('wind-gust'), weatherData.wind.gust);
+            setTextContentOnElement(
+                document.getElementById('wind-speed'),
+                weatherData.wind.speed,
+                temperatureUnit.speed.abbreviation
+            );
+            setTextContentOnElement(
+                document.getElementById('wind-deg'),
+                weatherData.wind.deg,
+                'deg'
+            );
+            setTextContentOnElement(
+                document.getElementById('wind-gust'), 
+                weatherData.wind.gust,
+                temperatureUnit.speed.abbreviation
+            );
         }
 
         // Clouds
         if ('clouds' in weatherData) {
-            setTextContentOnElement(document.getElementById('clouds'), weatherData.clouds.all);
+            setTextContentOnElement(
+                document.getElementById('clouds'),
+                weatherData.clouds.all,
+                '%'
+            );
         }
 
         // Rain
         if ('rain' in weatherData) {
-            setTextContentOnElement(document.getElementById('rain-1h'), weatherData.rain['1h']);
-            setTextContentOnElement(document.getElementById('rain-3h'), weatherData.rain['3h']);
+            setTextContentOnElement(
+                document.getElementById('rain-1h'),
+                weatherData.rain['1h'],
+                'mm'
+            );
+            setTextContentOnElement(
+                document.getElementById('rain-3h'),
+                weatherData.rain['3h'],
+                'mm'
+            );
         }
 
         // Snow
         if ('snow' in weatherData) {
-            setTextContentOnElement(document.getElementById('snow-1h'), weatherData.snow['1h']);
-            setTextContentOnElement(document.getElementById('snow-3h'), weatherData.snow['3h']);
+            setTextContentOnElement(
+                document.getElementById('snow-1h'),
+                weatherData.snow['1h'],
+                'mm'
+            );
+            setTextContentOnElement(
+                document.getElementById('snow-3h'),
+                weatherData.snow['3h'],
+                'mm'
+            );
         }
 
         // Datetime
-        setTextContentOnElement(document.getElementById('dt'), convertUnixTimestampToDate(weatherData.dt));
+        setTextContentOnElement(
+            document.getElementById('dt'), 
+            convertUnixTimestampToDate(weatherData.dt)
+        );
 
         // Timezone
         setTextContentOnElement(document.getElementById('timezone'), weatherData.timezone);
@@ -203,8 +302,14 @@ const weatherApp = (() => {
             setTextContentOnElement(document.getElementById('sys-id'), weatherData.sys.id);
             setTextContentOnElement(document.getElementById('sys-message'), weatherData.sys.message);
 
-            setTextContentOnElement(document.getElementById('sys-sunrise'), convertUnixTimestampToDate(weatherData.sys.sunrise));
-            setTextContentOnElement(document.getElementById('sys-sunset'), convertUnixTimestampToDate(weatherData.sys.sunset));
+            setTextContentOnElement(
+                document.getElementById('sys-sunrise'), 
+                convertUnixTimestampToDate(weatherData.sys.sunrise)
+            );
+            setTextContentOnElement(
+                document.getElementById('sys-sunset'), 
+                convertUnixTimestampToDate(weatherData.sys.sunset)
+            );
         }
     }
     
