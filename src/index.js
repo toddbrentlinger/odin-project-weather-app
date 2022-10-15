@@ -112,9 +112,39 @@ const weatherApp = (() => {
         temperatureUnit = newTemperatureUnit;
     }
 
+    /**
+     * 
+     * @param {String} searchInputValue 
+     * @returns {String}
+     */
     function createFetchURL(searchInputValue) {
         let url = `http://api.openweathermap.org/data/2.5/weather?q=${searchInputValue}&APPID=${openWeatherMapKey}`;
 
+        if (temperatureUnit.key) {
+            url += `&units=${temperatureUnit.key}`;
+        }
+
+        return url;
+    }
+
+    /**
+     * 
+     * @param {GeolocationPosition} geolocationPositon 
+     * @returns {String}
+     */
+    function createFetchURLWithGeolocationPosition(geolocationPositon) {
+        let url = `http://api.openweathermap.org/data/2.5/weather?`;
+
+        // Lat
+        url += `&lat=${geolocationPositon.coords.latitude}`;
+
+        // Lon
+        url += `&lon=${geolocationPositon.coords.longitude}`;
+
+        // App ID
+        url += `&APPID=${openWeatherMapKey}`;
+
+        // Units
         if (temperatureUnit.key) {
             url += `&units=${temperatureUnit.key}`;
         }
@@ -314,13 +344,38 @@ const weatherApp = (() => {
     }
     
     function init() {
+        // Use Geolocation API to get User's current position if available
+        if ('geolocation' in navigator) {
+            navigator.geolocation.getCurrentPosition((position) => {
+                console.log(position);
+
+                const unitsSelect = searchForm.querySelector('[name="units"]');
+
+                if (unitsSelect) {
+                    setTemperatureUnit(TemperatureUnits[unitsSelect.value]);
+                }
+
+                fetch(createFetchURLWithGeolocationPosition(position), {mode: 'cors',})
+                    .then((response) => response.json())
+                    .then((data) => {
+                        console.log(data);
+                        // Display weather data if response is valid
+                        if ('cod' in data && data.cod === 200) {
+                            displayWeatherData(data);
+                        } else {
+                            // Response not valid
+                        }
+                    });
+            });
+        }
+
         // Search form submit handler
         if (searchForm) {
             searchForm.addEventListener('submit', (e) => {
                 e.preventDefault();
     
-                const searchInput = e.target.querySelector('[name="search"]');
-                const unitsSelect = e.target.querySelector('[name="units"]');
+                const searchInput = searchForm.querySelector('[name="search"]');
+                const unitsSelect = searchForm.querySelector('[name="units"]');
 
                 if (unitsSelect) {
                     setTemperatureUnit(TemperatureUnits[unitsSelect.value]);
