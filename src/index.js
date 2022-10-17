@@ -168,7 +168,50 @@ const weatherApp = (() => {
     }
 
     function convertUnixTimestampToDate(unixTimestamp) {
-        return new Date(unixTimestamp * 1000).toLocaleTimeString();
+        return new Date(unixTimestamp * 1000)
+            .toLocaleTimeString('en-us', {
+                hour: 'numeric',
+                minute: 'numeric',
+            });
+    }
+
+    /**
+     * Converts number as degrees of circle to cardinal direction.
+     * @param {Number} degrees 
+     * @returns {String} Cardinal direction of wind.
+     */
+    function convertDegreesToDirection(degrees) {
+        const directionDegrees = {
+            'NNE': 11.25,
+            'NE': 33.75,
+            'ENE': 56.25,
+            'E': 78.75,
+            'ESE': 101.25,
+            'SE': 123.75,
+            'SSE': 146.25,
+            'S': 168.75,
+            'SSW': 191.25,
+            'SW': 213.75,
+            'WSW': 236.25,
+            'W': 258.75,
+            'WNW': 281.25,
+            'NW': 303.75,
+            'NNW': 326.25,
+            'N': 348.75,
+        };
+
+        // Clamp degrees parameter between 0-360
+
+        // Find matching direction
+        let prevDirection = 'N';
+        for (const [direction, maxDegrees] of Object.entries(directionDegrees)) {
+            if (degrees <= maxDegrees) {
+                return prevDirection;
+            }
+            prevDirection = direction;
+        }
+        // If reach here, degrees is more than 348.75. Return 'N'.
+        return 'N';
     }
 
     function displayWeatherData(weatherData) {
@@ -204,28 +247,28 @@ const weatherApp = (() => {
             // Main Temperature
             setTextContentOnElement(
                 document.getElementById('main-temp'),
-                weatherData.main.temp,
+                Math.round(weatherData.main.temp),
                 temperatureUnit.temperature.abbreviation
             );
 
             // Feels Like Temperature
             setTextContentOnElement(
                 document.getElementById('main-feels-like'),
-                weatherData.main.feels_like,
+                Math.round(weatherData.main.feels_like),
                 temperatureUnit.temperature.abbreviation
             );
 
             // Low Temperature
             setTextContentOnElement(
                 document.getElementById('main-temp-min'),
-                weatherData.main.temp_min,
+                Math.round(weatherData.main.temp_min),
                 temperatureUnit.temperature.abbreviation
             );
 
             // High Temperature
             setTextContentOnElement(
                 document.getElementById('main-temp-max'),
-                weatherData.main.temp_max,
+                Math.round(weatherData.main.temp_max),
                 temperatureUnit.temperature.abbreviation
             );
 
@@ -270,8 +313,7 @@ const weatherApp = (() => {
             );
             setTextContentOnElement(
                 document.getElementById('wind-deg'),
-                weatherData.wind.deg,
-                'deg'
+                convertDegreesToDirection(weatherData.wind.deg)
             );
             setTextContentOnElement(
                 document.getElementById('wind-gust'), 
@@ -318,8 +360,9 @@ const weatherApp = (() => {
         }
 
         // Datetime
-        let datetime = new Date(weatherData.dt * 1000);
-        const options = {
+        // dt is in seconds. Must be multiplied by 1000 to get milliseconds.
+        const datetimeLocal = new Date(weatherData.dt * 1000);
+        let options = {
             weekday: 'long',
             year: 'numeric',
             month: 'short',
@@ -329,11 +372,13 @@ const weatherApp = (() => {
         };
         setTextContentOnElement(
             document.getElementById('dt'), 
-            datetime.toLocaleString('en-us', options)
+            datetimeLocal.toLocaleString('en-us', options)
         );
 
         // Timezone
-        datetime = new Date((weatherData.dt + weatherData.timezone)* 1000);
+        // dt and timezone are in seconds. Must be multiplied by 1000 to get milliseconds.
+        // Method getTimezoneOffset() returns minutes. Must be multiplied by 60,000 to get milliseconds.
+        const datetime = new Date((weatherData.dt + weatherData.timezone + datetimeLocal.getTimezoneOffset()*60)* 1000);
         setTextContentOnElement(
             document.getElementById('timezone'), 
             datetime.toLocaleString('en-us', options)
