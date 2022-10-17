@@ -318,13 +318,26 @@ const weatherApp = (() => {
         }
 
         // Datetime
+        let datetime = new Date(weatherData.dt * 1000);
+        const options = {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric',
+        };
         setTextContentOnElement(
             document.getElementById('dt'), 
-            convertUnixTimestampToDate(weatherData.dt)
+            datetime.toLocaleString('en-us', options)
         );
 
         // Timezone
-        setTextContentOnElement(document.getElementById('timezone'), weatherData.timezone);
+        datetime = new Date((weatherData.dt + weatherData.timezone)* 1000);
+        setTextContentOnElement(
+            document.getElementById('timezone'), 
+            datetime.toLocaleString('en-us', options)
+        );
 
         // Sys
         if ('sys' in weatherData) {
