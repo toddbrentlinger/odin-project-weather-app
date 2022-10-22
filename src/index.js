@@ -3,11 +3,13 @@ import './styles.scss';
 import FooterComponent from './footerComponent';
 import { createElement } from './utilities';
 import WeatherPropertyComponent from './weatherPropertyComponent';
+import ArrowRightSVG from './arrow-right.svg';
 
 const weatherApp = (() => {
     const openWeatherMapKey = '4e7cceafee56ebb58f598a6cdad1a909';
     const mainElement = document.querySelector('main');
     const searchForm = document.querySelector('#topnav form');
+    const arrowRightImageElement = document.getElementById('wind-deg-img');
     const TemperatureUnits = {
         standard: {
             key: null,
@@ -320,6 +322,14 @@ const weatherApp = (() => {
                 weatherData.wind.gust,
                 temperatureUnit.speed.abbreviation
             );
+
+            // Set orientation of wind direction arrow
+            if (arrowRightImageElement && 'deg' in weatherData.wind) {
+                const arrowImg = arrowRightImageElement.querySelector('img');
+                if (arrowImg) {
+                    arrowImg.style.transform = `rotate(${weatherData.wind.deg - 90}deg)`;
+                }
+            }
         }
 
         // Clouds
@@ -405,8 +415,6 @@ const weatherApp = (() => {
         // Use Geolocation API to get User's current position if available
         if ('geolocation' in navigator) {
             navigator.geolocation.getCurrentPosition((position) => {
-                console.log(position);
-
                 const unitsSelect = searchForm.querySelector('[name="units"]');
 
                 if (unitsSelect) {
@@ -453,6 +461,14 @@ const weatherApp = (() => {
                         });
                 }
             }, false);
+        }
+
+        // Image - Wind Direction Arrow
+        if (arrowRightImageElement) {
+            const arrowRightImage = new Image();
+            arrowRightImage.src = ArrowRightSVG;
+            arrowRightImage.alt = 'wind direction arrow';
+            arrowRightImageElement.appendChild(arrowRightImage);
         }
     
         // Footer Component
