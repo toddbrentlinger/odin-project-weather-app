@@ -235,12 +235,17 @@ const weatherApp = (() => {
             setTextContentOnElement(document.getElementById('weather-id'), weatherData.weather[0].id);
             setTextContentOnElement(document.getElementById('weather-main'), weatherData.weather[0].main);
             setTextContentOnElement(document.getElementById('weather-description'), weatherData.weather[0].description);
+        }
 
-            // Icon
+        // Weather Icon
+        const weatherIconElement = document.getElementById('weather-icon');
+        try {
             const iconId = weatherData.weather[0].icon;
-            const weatherIconElement = document.getElementById('weather-icon');
-            if (iconId && weatherIconElement) {
-                weatherIconElement.src = `http://openweathermap.org/img/wn/${iconId}@2x.png`;
+            weatherIconElement.src = `http://openweathermap.org/img/wn/${iconId}@2x.png`;
+            weatherIconElement.classList.remove('hide');
+        } catch (e) {
+            if (weatherIconElement) {
+                weatherIconElement.classList.add('hide');
             }
         }
 
@@ -322,13 +327,16 @@ const weatherApp = (() => {
                 weatherData.wind.gust,
                 temperatureUnit.speed.abbreviation
             );
+        }
 
-            // Set orientation of wind direction arrow
-            if (arrowRightImageElement && 'deg' in weatherData.wind) {
-                const arrowImg = arrowRightImageElement.querySelector('img');
-                if (arrowImg) {
-                    arrowImg.style.transform = `rotate(${weatherData.wind.deg - 90}deg)`;
-                }
+        // Orientation of wind direction arrow icon
+        try {
+            const arrowImg = arrowRightImageElement.querySelector('img');
+            arrowImg.style.transform = `rotate(${weatherData.wind.deg - 90}deg)`;
+            arrowRightImageElement.classList.remove('hide');
+        } catch (e) {
+            if (arrowRightImageElement) {
+                arrowRightImageElement.classList.add('hide');
             }
         }
 
