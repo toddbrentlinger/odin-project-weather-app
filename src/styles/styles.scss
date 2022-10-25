@@ -31,6 +31,10 @@ body {
 
 header {
     grid-area: header;
+    text-align: center;
+    padding: 0.5em 1em;
+    border-bottom: 2px solid var(--base-black, black);
+    font-size: 2rem;
 }
 
 #topnav {
@@ -43,8 +47,25 @@ main {
 
 footer {
     grid-area: footer;
+    text-align: center;
+    padding: 0.5em 1em;
+    border-top: 2px solid var(--base-black, black);
+    font-size: 1.2rem;
 }
 
 .hide {
     display: none;
+}
+
+article {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(20vw, 1fr));
+
+    h2 {
+
+    }
+
+    section {
+
+    }
 }
