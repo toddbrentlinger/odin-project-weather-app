@@ -1,5 +1,5 @@
-import BaseComponent from './baseComponent';
-import { createElement } from './utilities';
+import BaseComponent from './baseComponent.js';
+import { createElement } from '../utilities.js';
 
 export default class FooterComponent extends BaseComponent {
     constructor(copyrightYear, sourceCodeURL) {

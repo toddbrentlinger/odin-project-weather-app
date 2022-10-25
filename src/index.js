@@ -1,9 +1,9 @@
-import './meyerReset.scss';
-import './styles.scss';
-import FooterComponent from './footerComponent';
+import './styles/meyerReset.scss';
+import './styles/styles.scss';
+import FooterComponent from './components/footerComponent';
 import { createElement } from './utilities';
-import WeatherPropertyComponent from './weatherPropertyComponent';
-import ArrowRightSVG from './arrow-right.svg';
+import WeatherPropertyComponent from './components/weatherPropertyComponent';
+import ArrowRightSVG from './img/arrow-right.svg';
 
 const weatherApp = (() => {
     const openWeatherMapKey = '4e7cceafee56ebb58f598a6cdad1a909';

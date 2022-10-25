@@ -1,4 +1,4 @@
-import { createElement } from './utilities';
+import { createElement } from '../utilities.js';
 
 export default class BaseComponent {
     constructor(props) {
