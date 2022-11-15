@@ -111,6 +111,7 @@ const weatherApp = (() => {
             return;
         }
 
+        // Assign new valid temperature unit
         temperatureUnit = newTemperatureUnit;
     }
 
@@ -202,7 +203,16 @@ const weatherApp = (() => {
             'N': 348.75,
         };
 
-        // Clamp degrees parameter between 0-360
+        // Clamp degrees parameter between 0-360, considering wrap-around
+        // EX. -60 = (-60)+360 = 300
+        // EX. 400 = 400-360 = 40
+        while (degrees < 0 || degrees > 360) {
+            if (degrees < 0) {
+                degrees += 360;
+            } else { // Else degrees > 360 (from while loop condition)
+                degrees -= 360;
+            }
+        }
 
         // Find matching direction
         let prevDirection = 'N';
@@ -480,7 +490,7 @@ const weatherApp = (() => {
         }
     
         // Footer Component
-        mainElement.appendChild(
+        document.body.appendChild(
             new FooterComponent(2022, 'https://github.com/toddbrentlinger/odin-project-weather-app')
                 .render()
         );
