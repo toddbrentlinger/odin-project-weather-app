@@ -226,6 +226,10 @@ const weatherApp = (() => {
         return 'N';
     }
 
+    /**
+     * 
+     * @param {Object} weatherData Weather API data response object
+     */
     function displayWeatherData(weatherData) {
         // Name
         let cityName = weatherData.name;
@@ -323,20 +327,30 @@ const weatherApp = (() => {
 
         // Wind
         if ('wind' in weatherData) {
-            setTextContentOnElement(
-                document.getElementById('wind-speed'),
-                weatherData.wind.speed,
-                temperatureUnit.speed.abbreviation
-            );
-            setTextContentOnElement(
-                document.getElementById('wind-deg'),
-                convertDegreesToDirection(weatherData.wind.deg)
-            );
-            setTextContentOnElement(
-                document.getElementById('wind-gust'), 
-                weatherData.wind.gust,
-                temperatureUnit.speed.abbreviation
-            );
+            const windElement = document.getElementById('wind-deg');
+            let windStrArr = [];
+            if ('deg' in weatherData.wind) {
+                windStrArr.push(
+                    convertDegreesToDirection(weatherData.wind.deg)
+                );
+            }
+            if ('speed' in weatherData.wind) {
+                windStrArr.push(
+                    `${ weatherData.wind.speed} ${temperatureUnit.speed.abbreviation}`
+                );
+            }
+            if ('gust' in weatherData.wind) {
+                windStrArr.push(
+                    `(Gusts ${weatherData.wind.gust} ${temperatureUnit.speed.abbreviation})`
+                );
+            }
+            if (windStrArr.length && windElement) {
+                windElement.textContent = windStrArr.join(' ');
+                windElement.classList.remove('hide');
+            } else {
+                windElement.textContent = '';
+                windElement.classList.add('hide');
+            }
         }
 
         // Orientation of wind direction arrow icon
@@ -407,10 +421,19 @@ const weatherApp = (() => {
         // dt and timezone are in seconds. Must be multiplied by 1000 to get milliseconds.
         // Method getTimezoneOffset() returns minutes. Must be multiplied by 60,000 to get milliseconds.
         const datetime = new Date((weatherData.dt + weatherData.timezone + datetimeLocal.getTimezoneOffset()*60)* 1000);
-        setTextContentOnElement(
-            document.getElementById('timezone'), 
-            datetime.toLocaleString('en-us', options)
-        );
+        const timezoneElement = document.getElementById('timezone');
+        if (timezoneElement) {
+            if (datetimeLocal.getTime() !== datetime.getTime()) {
+                timezoneElement.classList.remove('hide');
+                setTextContentOnElement(
+                    timezoneElement, 
+                    datetime.toLocaleString('en-us', options),
+                    `(${weatherData.name})`
+                );
+            } else {
+                timezoneElement.classList.add('hide');
+            }
+        }
 
         // Sys
         if ('sys' in weatherData) {

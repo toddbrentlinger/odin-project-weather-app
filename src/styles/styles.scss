@@ -70,7 +70,7 @@ article {
     }
 }
 
-#weather-section {
+#weather-section, #wind-section {
     display: grid;
     grid-auto-flow: row;
     justify-items: center;
