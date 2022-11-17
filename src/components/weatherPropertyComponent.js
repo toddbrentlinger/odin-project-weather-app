@@ -31,7 +31,7 @@ export default class WeatherPropertyComponent extends BaseComponent {
     get value() { return this._value; }
 
     render() {
-        this.initializeRender(document.createElement('section'));
+        this.initializeRender('section');
 
         this._element.append(
             createElement('span', {}, `${this._label}: `),

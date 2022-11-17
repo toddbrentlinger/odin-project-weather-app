@@ -9,7 +9,8 @@ export default class FooterComponent extends BaseComponent {
     }
 
     render() {
-        this._element = document.createElement('footer');
+        this.initializeRender('footer');
+
         const currYear = new Date().getFullYear();
 
         if (!this.copyrightYear) {

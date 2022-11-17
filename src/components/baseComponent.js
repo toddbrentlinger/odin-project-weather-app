@@ -31,9 +31,9 @@ export default class BaseComponent {
         }
     }
 
-    initializeRender(baseElement = document.createElement('div')) {
+    initializeRender(elementType = 'div') {
         if (!this._element) {
-            this._element = baseElement;
+            this._element = document.createElement(elementType);
         } else {
             this.emptyElement();
         }
