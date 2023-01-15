@@ -1,0 +1,50 @@
+WeatherProperty (Factory Method?)
+    - label {str}
+    - id {str} ? remove since element reference is saved instead
+    - postfix {str}
+    - defaultValue {*}
+    - value {*}
+    ------------------------------------
+    - element {HTMLElement|null} NOTE: Inside this OR Renderer?
+    - get/set value OR setValue()
+    - render()
+
+WeatherPropertyRenderer
+    -constructor(parentElement)
+    - parentElement {HTMLElement}
+        NOTE: parentElement should be in a separate class since the same element
+        reference is NOT saved for every instance
+    - weatherProp {WeatherProperty}
+    - element {HTMLElement|null}
+    - update(newVal)
+        + If newVal is different, set variable and call render() to 
+        refresh HTML element.
+
+WeatherApp (Singleton)
+    openWeatherMapKey
+    TemperatureUnits = { // Could create separate objects
+        standard: {
+            key: ,
+            temperature: {
+                name: ,
+                abbreviation
+            },
+            speed: {
+                name: ,
+                abbreviation
+            }
+        }
+    }
+    currentTemperatureUnit = TemperatureUnits.imperial (default value)
+    weatherProps = {
+        keyFromAPIResponse: WeatherProperty,
+    }
+    updateWeatherPropsFromResponse(apiResponse)
+        + From apiResponse object, update corresponding WeatherProperty
+        in weatherProps object.
+    render()
+        - Clears container element of weather properties
+        - Loops through each WeatherProperty in weatherProps and calls 
+        update() method which returns a newly created element to be 
+        added to the container element. If null is returned, skip adding
+        element to container element.
