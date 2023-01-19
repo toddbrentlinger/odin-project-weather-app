@@ -320,8 +320,8 @@ const weatherApp = (() => {
         // Visibility
         setTextContentOnElement(
             document.getElementById('visibility'),
-            weatherData.visibility,
-            'm'
+            temperatureUnit.key == 'imperial' ? convertUnit(weatherData.visibility, 'm', 'miles').toFixed(2) : weatherData.visibility,
+            temperatureUnit.key == 'imperial' ? 'miles' : 'm'
         );
 
         // Wind
@@ -376,13 +376,13 @@ const weatherApp = (() => {
         if ('rain' in weatherData) {
             setTextContentOnElement(
                 document.getElementById('rain-1h'),
-                weatherData.rain['1h'],
-                'mm'
+                temperatureUnit.key == 'imperial' ? convertUnit(weatherData.rain['1h'], 'mm', 'in').toFixed(2) : weatherData.rain['1h'],
+                temperatureUnit.key == 'imperial' ? 'in': 'mm'
             );
             setTextContentOnElement(
                 document.getElementById('rain-3h'),
-                weatherData.rain['3h'],
-                'mm'
+                temperatureUnit.key == 'imperial' ? convertUnit(weatherData.rain['3h'], 'mm', 'in').toFixed(2) : weatherData.rain['3h'],
+                temperatureUnit.key == 'imperial' ? 'in': 'mm'
             );
         }
 
@@ -390,13 +390,13 @@ const weatherApp = (() => {
         if ('snow' in weatherData) {
             setTextContentOnElement(
                 document.getElementById('snow-1h'),
-                weatherData.snow['1h'],
-                'mm'
+                temperatureUnit.key == 'imperial' ? convertUnit(weatherData.snow['1h'], 'mm', 'in').toFixed(2) : weatherData.snow['1h'],
+                temperatureUnit.key == 'imperial' ? 'in': 'mm'
             );
             setTextContentOnElement(
                 document.getElementById('snow-3h'),
-                weatherData.snow['3h'],
-                'mm'
+                temperatureUnit.key == 'imperial' ? convertUnit(weatherData.snow['3h'], 'mm', 'in').toFixed(2) : weatherData.snow['3h'],
+                temperatureUnit.key == 'imperial' ? 'in': 'mm'
             );
         }
 
