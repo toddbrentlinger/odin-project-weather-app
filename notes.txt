@@ -49,11 +49,12 @@ WeatherApp (Singleton)
         added to the container element. If null is returned, skip adding
         element to container element.
 
-Unit Converter
-
 1/16/23
 
 - Convert rain, snow, and visibility postfixes when User changes 
 units type.
 
 - ISSUE: Having snow value in one city will remain displayed with a new city.
+
+- Unit Converter: Return value should have no more than six digits.
+Six significant figures?

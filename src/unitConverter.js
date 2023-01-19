@@ -7,13 +7,14 @@
  */
 const unitConversions = {
     imperial: {
+        key: 'imperial',
         units: [
             {
                 keys: ['in', 'inch', 'inches',],
-                factor: 1,
+                factor: 1, // Relative to previous
             },
             {
-                keys: ['ft', 'feet',],
+                keys: ['ft', 'feet', 'foot',],
                 factor: 12,
             },
             {
@@ -30,6 +31,7 @@ const unitConversions = {
         },
     },
     metric: {
+        key: 'metric',
         units: [
             {
                 keys: ['mm', 'millimeter', 'millimeters',],
@@ -48,6 +50,7 @@ const unitConversions = {
                 factor: 1000,
             },
         ],
+        typeConversions: {},
     }
 };
 
@@ -67,9 +70,8 @@ before stepping toward final unit type.
  * @param {String} endUnitStr Units to convert the value to 
  */
 function convertUnit(value, startUnitStr, endUnitStr) {
-    debugger;
     // Test argument types
-    if (isNaN(value))
+    if (typeof value !== 'number')
         throw new TypeError('value to be converted must be a number.');
     if (typeof startUnitStr !== 'string' && !(startUnitStr instanceof String))
         throw new TypeError('startUnitStr must be a String type.')
@@ -81,17 +83,19 @@ function convertUnit(value, startUnitStr, endUnitStr) {
     endUnitStr = endUnitStr.toLowerCase();
 
     // Find start and end units
-    let startUnit, endUnit, startUnitType, endUnitType;
+    let startUnit, endUnit, startUnitType, endUnitType, startUnitIndex, endUnitIndex;
     outerloop:
     for (const unitType of Object.values(unitConversions)) {
-        for (const unit of unitType.units) {
+        for (const [index, unit] of unitType.units.entries()) {
             if (!startUnit && unit.keys.includes(startUnitStr)) {
                 startUnit = unit;
                 startUnitType = unitType;
+                startUnitIndex = index;
             }
             if (!endUnit && unit.keys.includes(endUnitStr)) {
                 endUnit = unit;
                 endUnitType = unitType;
+                endUnitIndex = index;
             }
 
             // Break outer loop if both units have been found
@@ -110,22 +114,100 @@ function convertUnit(value, startUnitStr, endUnitStr) {
 
     // Same Unit Type
     if (startUnitType === endUnitType) {
-        console.log('Same unit types');
+        // End unit is larger
+        if (startUnitIndex < endUnitIndex) {
+            while (startUnitIndex < endUnitIndex) {
+                value /= startUnitType.units[++startUnitIndex].factor;
+            }
+        } else if (startUnitIndex > endUnitIndex) {
+            while (startUnitIndex > endUnitIndex) {
+                value *= startUnitType.units[startUnitIndex--].factor;
+            }
+        }
+        // Else same unit type, return value unchanged
+    } else { // Different Unit Types
+        // Step up start unit type
+        while (startUnitIndex > 0) {
+            value *= startUnitType.units[startUnitIndex--].factor;
+        }
+
+        // Convert to end unit type
+
+        // Check unit type conversion in start unit type
+        if (endUnitType.key in startUnitType.typeConversions) {
+            value *= startUnitType.typeConversions[endUnitType.key];
+        }
+        // Check unit type conversion in end unit type 
+        else if (startUnitType.key in endUnitType.typeConversions) {
+            value /= endUnitType.typeConversions[startUnitType.key];
+        }
+        else {
+            throw new Error('No conversion between unit types available.');
+        }
+
+        // Step down end unit type, using endUnitIndex as counter
+        while (endUnitIndex > 0) {
+            value /= endUnitType.units[endUnitIndex--].factor;
+        }
+    }
+
+    return value;
+}
+
+function convertUnitUnitTestSingle(value, startUnitStr, endUnitStr, expectedOutput) {
+    let actualOutput;
+    try {
+        actualOutput = convertUnit(value, startUnitStr, endUnitStr);
+    } catch (e) {
+        console.log(e);
+        if (expectedOutput === undefined)
+            console.log('Test Pass');
+        else
+            console.error('Test Fail! Error.')
+        return false;
+    }
+
+    if (actualOutput == expectedOutput) {
+        console.log(`Test Pass`);
+        return true;
+    } else {
+        console.error(`Test Fail!\nvalue: ${value}\nstartUnitStr: ${startUnitStr}\nendUnitStr: ${endUnitStr}\nexpectedOutput: ${expectedOutput}\nactualOutput: ${actualOutput}`);
+        return false;
     }
 }
 
-export function convertMillimeterToInches(nMillimeters) {
-    // If argument is NOT a number, return that argument unchanged
-    if (isNaN(nMillimeters))
-        return nMillimeters;
-
-    return nMillimeters / 25.4;
+function convertUnitUnitTestAll() {
+    [
+        [1, 'ft', 'inches', 12],
+        [12, 'in', 'feet', 1],
+        [1, 'mile', 'ft', 5280],
+        [10560, 'ft', 'mi', 2],
+        [1, 'm', 'mm', 1000],
+        [100, 'mm', 'm', 0.1],
+        [1, 'km', 'm', 1000],
+        [1, 'km', 'foot', 3280.84],
+        ['', 'in', 'mm', undefined],
+        [1, '', 'in', undefined],
+        [1, 'in', '', undefined],
+        [1, '', '', undefined],
+    ].forEach((testArr) => convertUnitUnitTestSingle(...testArr));
 }
 
-export function convertMetersToMiles(nMeters) {
-    // If argument is NOT a number, return that argument unchanged
-    if (isNaN(nMeters))
-        return nMeters;
+window.convertUnit = convertUnit;
+convertUnitUnitTestAll();
 
-    return nMeters / 1609.34;
-}
+// export function convertMillimeterToInches(nMillimeters) {
+//     // If argument is NOT a number, return that argument unchanged
+//     if (isNaN(nMillimeters))
+//         return nMillimeters;
+
+//     return nMillimeters / 25.4;
+// }
+
+// export function convertMetersToMiles(nMeters) {
+//     // If argument is NOT a number, return that argument unchanged
+//     if (isNaN(nMeters))
+//         return nMeters;
+
+//     return nMeters / 1609.34;
+// }
