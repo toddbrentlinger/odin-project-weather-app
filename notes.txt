@@ -19,6 +19,8 @@ WeatherPropertyRenderer
     - update(newVal)
         + If newVal is different, set variable and call render() to 
         refresh HTML element.
+        + If newVal is undefined or null, either hide element or do NOT
+        render the element to the DOM
 
 WeatherApp (Singleton)
     openWeatherMapKey
