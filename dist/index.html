@@ -5,6 +5,14 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Odin Project - Weather App</title>
+
+    <link rel="apple-touch-icon" sizes="152x152" href="./apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png">
+    <link rel="manifest" href="./site.webmanifest">
+    <link rel="mask-icon" href="./safari-pinned-tab.svg" color="#4f32ff">
+    <meta name="msapplication-TileColor" content="#4f32ff">
+    <meta name="theme-color" content="#4f32ff">
 </head>
 <body>
     <script defer src="bundle.js"></script>
@@ -13,25 +21,84 @@
         <h1>Weather App</h1>
     </header>
     <nav id="topnav">
-        <form accept="" method="get">
-            <label for="weather-search">
-                <span>Enter location: </span>
-                <input type="search" name="search" id="weather-search" autofocus required>
-            </label>
-            <label for="weather-units-select">
-                <span>Units: </span>
-                <select name="units" id="weather-units-select" required>
-                    <option value="standard">Standard (K, m/s)</option>
-                    <option value="metric">Metric (&deg;C, m/s)</option>
-                    <option value="imperial" selected>Imperial (&deg;F, mph)</option>
-                </select>
-            </label>
+        <form id="weather-search-form" accept="" method="get">
+            <div id="weather-search-form-inputs">
+                <label for="weather-search">
+                    <!-- <span>Enter location: </span> -->
+                    <input type="search" name="search" id="weather-search" placeholder="Enter location" aria-label="Enter Location" autofocus required>
+                </label>
+                <label for="weather-units-select">
+                    <!-- <span>Units: </span> -->
+                    <select name="units" id="weather-units-select" aria-label="Select Units" required>
+                        <option value="standard">Standard (K, m/s)</option>
+                        <option value="metric">Metric (&deg;C, m/s)</option>
+                        <option value="imperial" selected>Imperial (&deg;F, mph)</option>
+                    </select>
+                </label>
+            </div>
             <input type="submit">
         </form>
     </nav>
     <main>
         <h2 id="name"></h2>
         <hr>
+
+        <article id="weather-card-list">
+            <div class="weather-card-container">
+                <div class="weather-card-content" id="coords">
+                    <h3>Coordinates</h3>
+                    <div>
+                        <span>Long: </span>
+                        <span id="coord-lon"></span>
+                    </div>
+                    <div>
+                        <span>Lat: </span>
+                        <span id="coord-lat"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="weather-card-container">
+                <div class="weather-card-content" id="weather-section">
+                    <h3>Weather</h3>
+                    <span id="weather-main"></span>
+                    <img src="" alt="weather-icon" id="weather-icon" class="hide">
+                    <span id="weather-description"></span>
+                </div>
+            </div>
+            <div class="weather-card-container">
+                <div class="weather-card-content" id="wind-section">
+                    <h3>Wind</h3>
+                    <span id="wind-deg"></span>
+                    <div id="wind-deg-img" class="hide"></div>
+                </div>
+            </div>
+            <!-- <section class="weather-card" id="coords">
+                <h2>Coordinates</h2>
+                <div>
+                    <span>Long: </span>
+                    <span id="coord-lon"></span>
+                </div>
+                <div>
+                    <span>Lat: </span>
+                    <span id="coord-lat"></span>
+                </div>
+            </section>
+    
+            <section class="weather-card" id="weather-section">
+                <span id="weather-main"></span>
+                <div class="weather-card-img-container">
+                    <img src="" alt="weather-icon" id="weather-icon" class="hide">
+                </div>
+                <span id="weather-description"></span>
+            </section>
+            
+            <section class="weather-card" id="wind-section">
+                <span id="wind-deg"></span>
+                <div id="wind-deg-img" class="hide"></div>
+            </section> -->
+        </article>
+
+        <!--
         <article id="coords">
             <h2>Coordinates</h2>
             <section>
@@ -43,6 +110,23 @@
                 <span id="coord-lat"></span>
             </section>
         </article>
+        <article class="weather-card">
+            <section id="weather-section">
+                <span id="weather-main"></span>
+                <img src="" alt="weather-icon" id="weather-icon" class="hide">
+                <span id="weather-description"></span>
+            </section>
+        </article> 
+        <hr>
+        <article>
+            <section id="wind-section">
+                <!-- <span>Wind Direction: </span> --><!--
+                <span id="wind-deg"></span>
+                <div id="wind-deg-img" class="hide"></div>
+            </section>
+        </article>
+        -->
+
         <hr>
         <article>
             <h2>Date/Time</h2>
@@ -51,14 +135,6 @@
             </section>
             <section>
                 <span id="timezone"></span>
-            </section>
-        </article>
-        <hr>
-        <article>
-            <section id="weather-section">
-                <span id="weather-main"></span>
-                <img src="" alt="weather-icon" id="weather-icon" class="hide">
-                <span id="weather-description"></span>
             </section>
         </article>
         <hr>
@@ -122,14 +198,6 @@
             </section>
         </article>
         <hr>
-        <article>
-            <section id="wind-section">
-                <!-- <span>Wind Direction: </span> -->
-                <span id="wind-deg"></span>
-                <div id="wind-deg-img" class="hide"></div>
-            </section>
-        </article>
-        <hr>
         <article id="rain-snow-container">
             <section id="rain-section">
                 <h2>Rain</h2>
@@ -169,6 +237,7 @@
     </main>
 </body>
 <!--
+    weather-icons by Mariana (Khomko) from https://www.figma.com/community/file/1007362387750930023/Weather-icons under license https://creativecommons.org/licenses/by/4.0/
     arrow-right.svg by OpenClipart from https://freesvg.org/1530317454
 -->
 </html>
