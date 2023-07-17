@@ -3,9 +3,9 @@ import { createElement } from './utilities';
 import WeatherPropertyComponent from './components/weatherPropertyComponent';
 import ArrowRightSVG from './img/arrow-right.svg';
 import { convertMetersToMiles, convertMillimeterToInches } from './unitConverter.js';
+import openWeatherMapAPI from './openWeatherMapAPI';
 
 const weatherApp = (() => {
-    const openWeatherMapKey = '4e7cceafee56ebb58f598a6cdad1a909';
     const mainElement = document.querySelector('main');
     const searchForm = document.querySelector('#topnav form');
     const arrowRightImageElement = document.getElementById('wind-deg-img');
@@ -45,6 +45,7 @@ const weatherApp = (() => {
         },
     };
 
+    let locationName;
     let temperatureUnit = TemperatureUnits.imperial;
     
     let weatherPropertyComponents = {
@@ -114,58 +115,19 @@ const weatherApp = (() => {
         temperatureUnit = newTemperatureUnit;
     }
 
-    /**
-     * 
-     * @param {String} searchInputValue 
-     * @returns {String}
-     */
-    function createFetchURL(searchInputValue) {
-        let url = `http://api.openweathermap.org/data/2.5/weather?q=${searchInputValue}&APPID=${openWeatherMapKey}`;
-
-        if (temperatureUnit.key) {
-            url += `&units=${temperatureUnit.key}`;
-        }
-
-        return url;
-    }
-
-    /**
-     * 
-     * @param {GeolocationPosition} geolocationPositon 
-     * @returns {String}
-     */
-    function createFetchURLWithGeolocationPosition(geolocationPositon) {
-        let url = `http://api.openweathermap.org/data/2.5/weather?`;
-
-        // Lat
-        url += `&lat=${geolocationPositon.coords.latitude}`;
-
-        // Lon
-        url += `&lon=${geolocationPositon.coords.longitude}`;
-
-        // App ID
-        url += `&APPID=${openWeatherMapKey}`;
-
-        // Units
-        if (temperatureUnit.key) {
-            url += `&units=${temperatureUnit.key}`;
-        }
-
-        return url;
-    }
-
     function setTextContentOnElement(element, value, postfix) {
-        if (element) {
-            if (value === undefined) {
-                element.textContent = '-';
-            } else { // Else value !== undefined
-                let textContent = value;
-                if (postfix) {
-                    textContent += ` ${postfix}`;
-                }
-                element.textContent = textContent;
+        if (!element) {
+            return;
+        }
+
+        if (value === undefined) {
+            element.textContent = '-';
+        } else { // Else value !== undefined
+            let textContent = value;
+            if (postfix) {
+                textContent += ` ${postfix}`;
             }
-           
+            element.textContent = textContent;
         }
     }
 
@@ -315,6 +277,9 @@ const weatherApp = (() => {
                 weatherData.main.grnd_level,
                 'hPa'
             );
+        } else {
+            setTextContentOnElement(document.getElementById('main-temp'));
+            setTextContentOnElement(document.getElementById('main-feels-like'));
         }
 
         // Visibility
@@ -326,6 +291,7 @@ const weatherApp = (() => {
 
         // Wind
         if ('wind' in weatherData) {
+            // Speed/Orientation
             const windElement = document.getElementById('wind-deg');
             let windStrArr = [];
             if ('deg' in weatherData.wind) {
@@ -338,17 +304,22 @@ const weatherApp = (() => {
                     `${ weatherData.wind.speed} ${temperatureUnit.speed.abbreviation}`
                 );
             }
-            if ('gust' in weatherData.wind) {
-                windStrArr.push(
-                    `(Gusts ${weatherData.wind.gust} ${temperatureUnit.speed.abbreviation})`
-                );
-            }
             if (windStrArr.length && windElement) {
                 windElement.textContent = windStrArr.join(' ');
                 windElement.classList.remove('hide');
             } else {
                 windElement.textContent = '';
                 windElement.classList.add('hide');
+            }
+
+            // Gust
+            const windGustElement = document.getElementById('wind-gust');
+            if ('gust' in weatherData.wind) {
+                windGustElement.textContent = `(Gusts ${weatherData.wind.gust} ${temperatureUnit.speed.abbreviation})`;
+                windGustElement.classList.remove('hide');
+            } else {
+                windGustElement.textContent = '';
+                windGustElement.classList.add('hide');
             }
         }
 
@@ -419,19 +390,13 @@ const weatherApp = (() => {
         // Timezone
         // dt and timezone are in seconds. Must be multiplied by 1000 to get milliseconds.
         // Method getTimezoneOffset() returns minutes. Must be multiplied by 60,000 to get milliseconds.
-        const datetime = new Date((weatherData.dt + weatherData.timezone + datetimeLocal.getTimezoneOffset()*60)* 1000);
+        const datetime = new Date((weatherData.dt + weatherData.timezone + datetimeLocal.getTimezoneOffset()*60) * 1000);
         const timezoneElement = document.getElementById('timezone');
         if (timezoneElement) {
-            if (datetimeLocal.getTime() !== datetime.getTime()) {
-                timezoneElement.classList.remove('hide');
-                setTextContentOnElement(
-                    timezoneElement, 
-                    datetime.toLocaleString('en-us', options),
-                    `(${weatherData.name})`
-                );
-            } else {
-                timezoneElement.classList.add('hide');
-            }
+            setTextContentOnElement(
+                timezoneElement, 
+                datetime.toLocaleString('en-us', options)
+            );
         }
 
         // Sys
@@ -461,12 +426,12 @@ const weatherApp = (() => {
                     setTemperatureUnit(TemperatureUnits[unitsSelect.value]);
                 }
 
-                fetch(createFetchURLWithGeolocationPosition(position), {mode: 'cors',})
-                    .then((response) => response.json())
+                openWeatherMapAPI.fetchWithGeolocation(position, temperatureUnit.key)
                     .then((data) => {
                         console.log(data);
                         // Display weather data if response is valid
                         if ('cod' in data && data.cod === 200) {
+                            locationName = data.name;
                             displayWeatherData(data);
                         } else {
                             // Response not valid
@@ -488,12 +453,12 @@ const weatherApp = (() => {
                 }
 
                 if (searchInput) {
-                    fetch(createFetchURL(searchInput.value), {mode: 'cors',})
-                        .then((response) => response.json())
+                    openWeatherMapAPI.fetchWithSearch(searchInput.value, temperatureUnit.key)
                         .then((data) => {
                             console.log(data);
                             // Display weather data if response is valid
                             if ('cod' in data && data.cod === 200) {
+                                locationName = data.name;
                                 displayWeatherData(data);
                             } else {
                                 // Response not valid
@@ -520,6 +485,7 @@ const weatherApp = (() => {
 
     return {
         init,
+        get locationName() { return locationName; },
     };
 })();
 

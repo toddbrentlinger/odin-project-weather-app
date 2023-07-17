@@ -73,6 +73,14 @@ article {
     }
 }
 
+// Custom IDs
+
+#hi-low-temp-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
 #name {
     font-size: 3rem;
 }
@@ -86,12 +94,13 @@ article {
 
 .weather-card-container {
     --padding-and-radius: 1rem;
-    border: 2px solid black;
     border-radius: var(--padding-and-radius);
     width: 25%;
     min-width: 17rem;
     max-width: 25rem;
     position: relative;
+    border: 1px solid #ccc;
+    box-shadow: 2px 2px 6px 0px rgba(0,0,0,0.3);
 
     &::after {
         content: "";
@@ -166,14 +175,13 @@ article {
 #weather-icon {
     background-color: white;
     border-radius: 25%;
-    flex: 1;
 }
 
 #weather-description {
     text-transform: capitalize;
 }
 
-#wind-deg-img {
+.weather-card-img-container {
     flex: 1;
     width: 100%;
     display: grid;
@@ -182,6 +190,11 @@ article {
 
     img {
         height: 100%;
+    }
+}
+
+#wind-deg-img {
+    img {
         transform: rotate(-90deg);
         transition: transform ease-in-out 500ms;
     }
