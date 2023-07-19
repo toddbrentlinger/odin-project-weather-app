@@ -69,7 +69,7 @@ before stepping toward final unit type.
  * @param {String} startUnitStr Units of the value
  * @param {String} endUnitStr Units to convert the value to 
  */
-function convertUnit(value, startUnitStr, endUnitStr) {
+export function convertUnit(value, startUnitStr, endUnitStr) {
     // Test argument types
     if (typeof value !== 'number')
         throw new TypeError('value to be converted must be a number.');

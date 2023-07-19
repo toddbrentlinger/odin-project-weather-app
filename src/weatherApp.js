@@ -1,13 +1,12 @@
 import FooterComponent from './components/footerComponent';
-import { capitalize, createElement } from './utilities';
+import { capitalize, createElement, getDateWithTimezoneOffet } from './utilities';
 import WeatherPropertyComponent from './components/weatherPropertyComponent';
 import ArrowRightSVG from './img/arrow-right.svg';
-import { convertMetersToMiles, convertMillimeterToInches } from './unitConverter.js';
 import openWeatherMapAPI from './openWeatherMapAPI';
 import createDayNightDial from './dayNightDial';
+import { convertUnit } from './unitConverter';
 
 const weatherApp = (() => {
-    const mainElement = document.querySelector('main');
     const searchForm = document.querySelector('#topnav form');
     const arrowRightImageElement = document.getElementById('wind-deg-img');
     const dayNightDial = createDayNightDial();
@@ -133,14 +132,6 @@ const weatherApp = (() => {
         }
     }
 
-    function convertUnixTimestampToDate(unixTimestamp) {
-        return new Date(unixTimestamp * 1000)
-            .toLocaleTimeString('en-us', {
-                hour: 'numeric',
-                minute: 'numeric',
-            });
-    }
-
     /**
      * Converts number as degrees of circle to cardinal direction.
      * @param {Number} degrees 
@@ -242,12 +233,6 @@ const weatherApp = (() => {
         return strArr.join(' ');
     }
 
-    function getDateWithTimezoneOffet(timeUnix, timezoneShiftUnix, timezoneOffset) {
-        // dt and timezone are in seconds. Must be multiplied by 1000 to get milliseconds.
-        // Method getTimezoneOffset() returns minutes. Must be multiplied by 60,000 to get milliseconds.
-        return new Date((timeUnix + timezoneShiftUnix + timezoneOffset * 60) * 1000);
-    }
-
     /**
      * 
      * @param {Object} weatherData Weather API data response object
@@ -261,11 +246,6 @@ const weatherApp = (() => {
         setTextContentOnElement(document.getElementById('name'), cityName);
 
         // Weather Description
-        // if ('weather' in weatherData && weatherData.weather.length) {
-        //     setTextContentOnElement(document.getElementById('weather-condition-id'), weatherData.weather[0].id);
-        //     setTextContentOnElement(document.getElementById('weather-condition-main'), weatherData.weather[0].main);
-        //     setTextContentOnElement(document.getElementById('weather-condition-description'), weatherData.weather[0].description);
-        // }
         setTextContentOnElement(document.getElementById('weather-description'), createWeatherConditionDescription(weatherData));
 
         // Weather Icon
@@ -462,62 +442,13 @@ const weatherApp = (() => {
             );
         }
 
-        // Sys
+        // Sys (sunrise and sunset)
         if ('sys' in weatherData) {
-            setTextContentOnElement(document.getElementById('sys-type'), weatherData.sys.type);
-            setTextContentOnElement(document.getElementById('sys-id'), weatherData.sys.id);
-            setTextContentOnElement(document.getElementById('sys-message'), weatherData.sys.message);
-
-            const sunriseDatetime = getDateWithTimezoneOffet(weatherData.sys.sunrise, weatherData.timezone, datetimeLocal.getTimezoneOffset())
-                .toLocaleTimeString('en-us', {
-                    hour: 'numeric',
-                    minute: 'numeric',
-                });
-            setTextContentOnElement(
-                document.getElementById('sys-sunrise'), 
-                //convertUnixTimestampToDate(weatherData.sys.sunrise)
-                sunriseDatetime
-            );
-
-            const sunsetDatetime = getDateWithTimezoneOffet(weatherData.sys.sunset, weatherData.timezone, datetimeLocal.getTimezoneOffset())
-                .toLocaleTimeString('en-us', {
-                    hour: 'numeric',
-                    minute: 'numeric',
-                });
-            setTextContentOnElement(
-                document.getElementById('sys-sunset'), 
-                //convertUnixTimestampToDate(weatherData.sys.sunset)
-                sunsetDatetime
-            );
+            dayNightDial.update(weatherData.dt, weatherData.sys.sunrise, weatherData.sys.sunset, weatherData.timezone, datetimeLocal.getTimezoneOffset());
         }
-
-        dayNightDial.setAngle(weatherData.dt, weatherData.sys.sunrise, weatherData.sys.sunset);
     }
     
     function init() {
-        // Use Geolocation API to get User's current position if available
-        if ('geolocation' in navigator) {
-            navigator.geolocation.getCurrentPosition((position) => {
-                const unitsSelect = searchForm.querySelector('[name="units"]');
-
-                if (unitsSelect) {
-                    setTemperatureUnit(TemperatureUnits[unitsSelect.value]);
-                }
-
-                openWeatherMapAPI.fetchWithGeolocation(position, temperatureUnit.key)
-                    .then((data) => {
-                        console.log(data);
-                        // Display weather data if response is valid
-                        if ('cod' in data && data.cod === 200) {
-                            locationName = data.name;
-                            displayWeatherData(data);
-                        } else {
-                            // Response not valid
-                        }
-                    });
-            });
-        }
-
         // Search form submit handler
         if (searchForm) {
             searchForm.addEventListener('submit', (e) => {
@@ -554,11 +485,7 @@ const weatherApp = (() => {
             arrowRightImageElement.appendChild(arrowRightImage);
         }
 
-        // Day-Night Dial Image
-        // const dayNightImgElement = document.querySelector('#day-night-img-container img');
-        // if (dayNightImgElement) {
-        //     dayNightImgElement.src = DayNightPNG;
-        // }
+        // Day-Night Dial
         const dayNightImgContainer = document.getElementById('sunrise-sunset-container');
         if (dayNightImgContainer) {
             dayNightDial.init(dayNightImgContainer);
@@ -570,6 +497,29 @@ const weatherApp = (() => {
             new FooterComponent(2022, 'https://github.com/toddbrentlinger/odin-project-weather-app')
                 .render()
         );
+
+        // Use Geolocation API to get User's current position if available
+        if ('geolocation' in navigator) {
+            navigator.geolocation.getCurrentPosition((position) => {
+                const unitsSelect = searchForm.querySelector('[name="units"]');
+
+                if (unitsSelect) {
+                    setTemperatureUnit(TemperatureUnits[unitsSelect.value]);
+                }
+
+                openWeatherMapAPI.fetchWithGeolocation(position, temperatureUnit.key)
+                    .then((data) => {
+                        console.log(data);
+                        // Display weather data if response is valid
+                        if ('cod' in data && data.cod === 200) {
+                            locationName = data.name;
+                            displayWeatherData(data);
+                        } else {
+                            // Response not valid
+                        }
+                    });
+            });
+        }
     }
 
     return {
