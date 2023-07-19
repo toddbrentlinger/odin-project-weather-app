@@ -50,10 +50,14 @@ export function addCommasToNumber(num) {
             // Add comma (cannot be first index from while loop condition)
             num = num.slice(0, i) + ',' + num.slice(i);
 
-            counter = 0;
+            counter = 1;
         }
         i--;
     }
 
     return num;
+}
+
+export function capitalize(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
 }

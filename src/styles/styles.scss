@@ -60,25 +60,69 @@ footer {
     display: none;
 }
 
-article {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(20vw, 1fr));
+// Custom IDs
 
-    h2 {
+#day-night-img-container {
+    border: 2px solid black;
+    display: inline-block;
+    width: 50%;
+    position: relative;
+    overflow: hidden;
 
+    &::after {
+        content: "";
+        display: block;
+        padding-top: 50%;
     }
 
-    section {
-
+    img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        transform: rotate(0deg);
     }
 }
 
-// Custom IDs
-
-#hi-low-temp-container {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
+#weather-main {
+    --weather-main-border-radius-padding: 1rem;
+    display: inline-grid;
+    grid-template-columns: repeat(2, auto);
     gap: 1rem;
+    //background-color: white;
+    border-radius: var(--weather-main-border-radius-padding, 1rem);
+    padding: var(--weather-main-border-radius-padding, 1rem);
+    border: 1px solid #ccc;
+    //box-shadow: 2px 2px 6px 0px rgba(0,0,0,0.3);
+
+    .weather-card-img-container {
+
+        #weather-icon {
+            background-color: white;
+            border-radius: 25%;
+            border: 1px solid #ccc;
+            box-shadow: 2px 2px 6px 0px rgba(0,0,0,0.3);
+            margin-right: 6px;
+        }
+    }
+
+    #temp-container {
+        display: grid;
+        grid-template-rows: 1fr auto;
+        justify-items: center;
+        align-items: center;
+
+        #main-temp {
+            font-size: 5rem;
+        }
+    
+        #hi-low-temp-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            justify-items: center;
+            gap: 1rem;
+        }
+    }
 }
 
 #name {
@@ -158,27 +202,6 @@ article {
             border: none;
         }
     }
-}
-
-// #weather-section, #wind-section {
-//     display: grid;
-//     //grid-auto-flow: row;
-//     grid-auto-rows: auto 1fr auto;
-//     justify-items: center;
-//     gap: 0.5em;
-
-//     img {
-//         width: auto;
-//     }
-// }
-
-#weather-icon {
-    background-color: white;
-    border-radius: 25%;
-}
-
-#weather-description {
-    text-transform: capitalize;
 }
 
 .weather-card-img-container {

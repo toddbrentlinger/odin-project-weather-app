@@ -1,14 +1,16 @@
 import FooterComponent from './components/footerComponent';
-import { createElement } from './utilities';
+import { capitalize, createElement } from './utilities';
 import WeatherPropertyComponent from './components/weatherPropertyComponent';
 import ArrowRightSVG from './img/arrow-right.svg';
 import { convertMetersToMiles, convertMillimeterToInches } from './unitConverter.js';
 import openWeatherMapAPI from './openWeatherMapAPI';
+import createDayNightDial from './dayNightDial';
 
 const weatherApp = (() => {
     const mainElement = document.querySelector('main');
     const searchForm = document.querySelector('#topnav form');
     const arrowRightImageElement = document.getElementById('wind-deg-img');
+    const dayNightDial = createDayNightDial();
     const TemperatureUnits = {
         standard: {
             key: null,
@@ -125,7 +127,7 @@ const weatherApp = (() => {
         } else { // Else value !== undefined
             let textContent = value;
             if (postfix) {
-                textContent += ` ${postfix}`;
+                textContent += `${postfix}`;
             }
             element.textContent = textContent;
         }
@@ -188,6 +190,65 @@ const weatherApp = (() => {
     }
 
     /**
+     * Get description of wind speed according to https://www.weather.gov/pqr/wind
+     * @param {Number} windSpeed 
+     * @returns {String}
+     */
+    function getWindSpeedDescription(windSpeed) {
+        // Convert to imperial mph if in metric/kelvin m/s
+        if (temperatureUnit.key !== 'imperial') {
+            windSpeed *= 2.23694;
+        }
+
+        if (windSpeed < 1) { return 'calm'; }
+        else if (windSpeed < 4) { return 'light air'; }
+        else if (windSpeed < 8) { return 'light breeze'; }
+        else if (windSpeed < 13) { return 'gentle breeze'; }
+        else if (windSpeed < 19) { return 'moderate breeze'; }
+        else if (windSpeed < 25) { return 'fresh breeze'; }
+        else if (windSpeed < 32) { return 'strong breeze'; }
+        else if (windSpeed < 39) { return 'near gale'; }
+        else if (windSpeed < 47) { return 'gale'; }
+        else if (windSpeed < 55) { return 'strong gale'; }
+        else if (windSpeed < 64) { return 'whole gale'; }
+        else if (windSpeed < 76) { return 'storm force'; }
+        else { return 'hurricane force'; }
+    }
+
+    function createWeatherConditionDescription(weatherData) {
+        let strArr = [];
+        let strTemp;
+
+        // Feels like
+        if ('main' in weatherData) {
+            strArr.push(
+                `Feels like ${Math.round(weatherData.main.feels_like) + temperatureUnit.temperature.abbreviation}.`
+            );
+        }
+
+        // Description
+        if ('weather' in weatherData && weatherData.weather.length) {
+            // Capitialize first letter of description
+            strTemp = capitalize(weatherData.weather[0].description + '.');
+            strArr.push(strTemp);
+        }
+
+        // Wind
+        if ('wind' in weatherData && 'speed' in weatherData.wind) {
+            strTemp = capitalize(getWindSpeedDescription(weatherData.wind.speed)) + ' wind.';
+            strArr.push(strTemp);
+        }
+
+        return strArr.join(' ');
+    }
+
+    function getDateWithTimezoneOffet(timeUnix, timezoneShiftUnix, timezoneOffset) {
+        // dt and timezone are in seconds. Must be multiplied by 1000 to get milliseconds.
+        // Method getTimezoneOffset() returns minutes. Must be multiplied by 60,000 to get milliseconds.
+        return new Date((timeUnix + timezoneShiftUnix + timezoneOffset * 60) * 1000);
+    }
+
+    /**
      * 
      * @param {Object} weatherData Weather API data response object
      */
@@ -199,18 +260,13 @@ const weatherApp = (() => {
         }
         setTextContentOnElement(document.getElementById('name'), cityName);
 
-        // Coords
-        if ('coord' in weatherData) {
-            setTextContentOnElement(document.getElementById('coord-lon'), weatherData.coord.lon);
-            setTextContentOnElement(document.getElementById('coord-lat'), weatherData.coord.lat);
-        }
-
-        // Weather
-        if ('weather' in weatherData && weatherData.weather.length) {
-            setTextContentOnElement(document.getElementById('weather-id'), weatherData.weather[0].id);
-            setTextContentOnElement(document.getElementById('weather-main'), weatherData.weather[0].main);
-            setTextContentOnElement(document.getElementById('weather-description'), weatherData.weather[0].description);
-        }
+        // Weather Description
+        // if ('weather' in weatherData && weatherData.weather.length) {
+        //     setTextContentOnElement(document.getElementById('weather-condition-id'), weatherData.weather[0].id);
+        //     setTextContentOnElement(document.getElementById('weather-condition-main'), weatherData.weather[0].main);
+        //     setTextContentOnElement(document.getElementById('weather-condition-description'), weatherData.weather[0].description);
+        // }
+        setTextContentOnElement(document.getElementById('weather-description'), createWeatherConditionDescription(weatherData));
 
         // Weather Icon
         const weatherIconElement = document.getElementById('weather-icon');
@@ -280,6 +336,12 @@ const weatherApp = (() => {
         } else {
             setTextContentOnElement(document.getElementById('main-temp'));
             setTextContentOnElement(document.getElementById('main-feels-like'));
+        }
+
+        // Coords
+        if ('coord' in weatherData) {
+            setTextContentOnElement(document.getElementById('coord-lon'), weatherData.coord.lon);
+            setTextContentOnElement(document.getElementById('coord-lat'), weatherData.coord.lat);
         }
 
         // Visibility
@@ -390,7 +452,8 @@ const weatherApp = (() => {
         // Timezone
         // dt and timezone are in seconds. Must be multiplied by 1000 to get milliseconds.
         // Method getTimezoneOffset() returns minutes. Must be multiplied by 60,000 to get milliseconds.
-        const datetime = new Date((weatherData.dt + weatherData.timezone + datetimeLocal.getTimezoneOffset()*60) * 1000);
+        //const datetime = new Date((weatherData.dt + weatherData.timezone + datetimeLocal.getTimezoneOffset()*60) * 1000);
+        const datetime = getDateWithTimezoneOffet(weatherData.dt, weatherData.timezone, datetimeLocal.getTimezoneOffset());
         const timezoneElement = document.getElementById('timezone');
         if (timezoneElement) {
             setTextContentOnElement(
@@ -405,15 +468,30 @@ const weatherApp = (() => {
             setTextContentOnElement(document.getElementById('sys-id'), weatherData.sys.id);
             setTextContentOnElement(document.getElementById('sys-message'), weatherData.sys.message);
 
+            const sunriseDatetime = getDateWithTimezoneOffet(weatherData.sys.sunrise, weatherData.timezone, datetimeLocal.getTimezoneOffset())
+                .toLocaleTimeString('en-us', {
+                    hour: 'numeric',
+                    minute: 'numeric',
+                });
             setTextContentOnElement(
                 document.getElementById('sys-sunrise'), 
-                convertUnixTimestampToDate(weatherData.sys.sunrise)
+                //convertUnixTimestampToDate(weatherData.sys.sunrise)
+                sunriseDatetime
             );
+
+            const sunsetDatetime = getDateWithTimezoneOffet(weatherData.sys.sunset, weatherData.timezone, datetimeLocal.getTimezoneOffset())
+                .toLocaleTimeString('en-us', {
+                    hour: 'numeric',
+                    minute: 'numeric',
+                });
             setTextContentOnElement(
                 document.getElementById('sys-sunset'), 
-                convertUnixTimestampToDate(weatherData.sys.sunset)
+                //convertUnixTimestampToDate(weatherData.sys.sunset)
+                sunsetDatetime
             );
         }
+
+        dayNightDial.setAngle(weatherData.dt, weatherData.sys.sunrise, weatherData.sys.sunset);
     }
     
     function init() {
@@ -475,6 +553,17 @@ const weatherApp = (() => {
             arrowRightImage.alt = 'wind direction arrow';
             arrowRightImageElement.appendChild(arrowRightImage);
         }
+
+        // Day-Night Dial Image
+        // const dayNightImgElement = document.querySelector('#day-night-img-container img');
+        // if (dayNightImgElement) {
+        //     dayNightImgElement.src = DayNightPNG;
+        // }
+        const dayNightImgContainer = document.getElementById('sunrise-sunset-container');
+        if (dayNightImgContainer) {
+            dayNightDial.init(dayNightImgContainer);
+        }
+
     
         // Footer Component
         document.body.appendChild(
@@ -486,6 +575,7 @@ const weatherApp = (() => {
     return {
         init,
         get locationName() { return locationName; },
+        openWeatherMapAPI,
     };
 })();
 

@@ -44,8 +44,36 @@
         <span id="timezone"></span>
         <hr>
 
+        <section id="weather-main">
+            <div class="weather-card-img-container">
+                <!-- <img src="" alt="weather-icon" id="weather-icon" class="hide"> -->
+                <img src="http://openweathermap.org/img/wn/02d@2x.png" alt="weather-icon" id="weather-icon">
+            </div>
+            <div id="temp-container">
+                <div id="main-temp"></div>
+                <div id="hi-low-temp-container">
+                    <div title="Low Temperature">
+                        <span>Min: </span>
+                        <span id="main-temp-min"></span>
+                    </div>
+                    <div title="High Temperature">
+                        <span>Max: </span>
+                        <span id="main-temp-max"></span>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section id="weather-description"></section>
+        <section id="weather-detail"></section>
+
+        <section id="sunrise-sunset-container">
+            <!-- <div id="day-night-img-container">
+                <img src="" alt="Time of day dial">
+            </div> -->
+        </section>
+
         <article id="weather-card-list">
-            <div class="weather-card-container">
+            <!-- <div class="weather-card-container">
                 <div class="weather-card-content" id="weather-section">
                     <h3>Temperature</h3>
                     <div id="main-temp"></div>
@@ -64,7 +92,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> -->
             <div class="weather-card-container">
                 <div class="weather-card-content" id="coords">
                     <h3>Coordinates</h3>
@@ -78,16 +106,16 @@
                     </div>
                 </div>
             </div>
-            <div class="weather-card-container">
+            <!-- <div class="weather-card-container">
                 <div class="weather-card-content" id="weather-section">
                     <h3>Weather</h3>
-                    <span id="weather-main"></span>
+                    <span id="weather-condition-main"></span>
                     <div class="weather-card-img-container">
                         <img src="" alt="weather-icon" id="weather-icon" class="hide">
                     </div>
-                    <span id="weather-description"></span>
+                    <span id="weather-condition-description"></span>
                 </div>
-            </div>
+            </div> -->
             <div class="weather-card-container">
                 <div class="weather-card-content" id="wind-section">
                     <h3>Wind</h3>
@@ -258,7 +286,7 @@
                 <span id="clouds"></span>
             </section>
         </article>
-        
+
         <article id="last-updated">
             <span>Last Updated: </span>
             <span id="dt"></span>
@@ -267,6 +295,7 @@
 </body>
 <!--
     weather-icons by Mariana (Khomko) from https://www.figma.com/community/file/1007362387750930023/Weather-icons under license https://creativecommons.org/licenses/by/4.0/
+    day-night-cycle by ZainnyOsu from https://imgbin.com/png/F5f2LUew/day-night-png
     arrow-right.svg by OpenClipart from https://freesvg.org/1530317454
 -->
 </html>
