@@ -1,6 +1,7 @@
+import HeaderComponent from './components/headerComponent';
+import TopNavComponent from './components/topNavComponent';
 import FooterComponent from './components/footerComponent';
 import { capitalize, createElement, getDateWithTimezoneOffet } from './utilities';
-import WeatherPropertyComponent from './components/weatherPropertyComponent';
 import ArrowRightSVG from './img/arrow-right.svg';
 import openWeatherMapAPI from './openWeatherMapAPI';
 import createDayNightDial from './dayNightDial';
@@ -48,59 +49,6 @@ const weatherApp = (() => {
 
     let locationName;
     let temperatureUnit = TemperatureUnits.imperial;
-    
-    let weatherPropertyComponents = {
-        name: new WeatherPropertyComponent(null, 'name'),
-        'coord-lon': new WeatherPropertyComponent('Long', 'coord-lon'),
-        'coord-lat': new WeatherPropertyComponent('Lat', 'coord-lat'),
-        'weather-id': new WeatherPropertyComponent('ID', 'weather-id'),
-        'weather-main': new WeatherPropertyComponent('Main', 'weather-main'),
-        'weather-description': new WeatherPropertyComponent('Description', 'weather-description'),
-        'weather-icon': new WeatherPropertyComponent('Icon', 'weather-icon'),
-        // TODO: Add remaining
-    };
-
-    /**
-     * 
-     * @param {String} key 
-     * @param {WeatherPropertyComponent} newWeatherPropertyComponent 
-     */
-    function addWeatherPropertyComponent(key, newWeatherPropertyComponent) {
-        // Check argument types
-
-        // Check if key already exists
-        // ISSUE: Could use to replace existing key with new component
-
-        // Add to weatherPropertyComponents object
-        weatherPropertyComponents[key] = newWeatherPropertyComponent;
-
-        return newWeatherPropertyComponent;
-    }
-
-    function createWeatherUnitsSelect() {
-        const formSelectId = 'weather-units-select';
-        const labelElement = createElement(
-            'label', 
-            {'for': formSelectId},
-            createElement('span', {}, 'Units: ')
-        );
-
-        const selectElement = labelElement.appendChild(
-            createElement('select', {name: 'units', id: formSelectId, required: true})
-        );
-
-        selectElement.append(
-            Object.entries(TemperatureUnits).map((key, tempObj) => {
-                createElement(
-                    'input', 
-                    {value: key}, 
-                    `${tempObj.key.toUpperCase()} (${tempObj.temperature.abbreviation}, ${tempObj.speed.abbreviation})`
-                )
-            })
-        );
-
-        return labelElement;
-    }
 
     function setTemperatureUnit(newTemperatureUnit) {
         // Check if valid temperature unit
@@ -384,33 +332,49 @@ const weatherApp = (() => {
                 '%'
             );
         }
-
-        // Rain
-        if ('rain' in weatherData) {
+        
+        // Rain 1H
+        try {
             setTextContentOnElement(
                 document.getElementById('rain-1h'),
                 temperatureUnit.key == 'imperial' ? convertUnit(weatherData.rain['1h'], 'mm', 'in').toFixed(2) : weatherData.rain['1h'],
                 temperatureUnit.key == 'imperial' ? 'in': 'mm'
             );
+        } catch(e) {
+            setTextContentOnElement(document.getElementById('rain-1h'));
+        }
+
+        // Rain 3H
+        try {
             setTextContentOnElement(
                 document.getElementById('rain-3h'),
                 temperatureUnit.key == 'imperial' ? convertUnit(weatherData.rain['3h'], 'mm', 'in').toFixed(2) : weatherData.rain['3h'],
                 temperatureUnit.key == 'imperial' ? 'in': 'mm'
             );
+        } catch(e) {
+            setTextContentOnElement(document.getElementById('rain-3h'));
         }
-
-        // Snow
-        if ('snow' in weatherData) {
+        
+        // Snow 1H
+        try {
             setTextContentOnElement(
                 document.getElementById('snow-1h'),
                 temperatureUnit.key == 'imperial' ? convertUnit(weatherData.snow['1h'], 'mm', 'in').toFixed(2) : weatherData.snow['1h'],
                 temperatureUnit.key == 'imperial' ? 'in': 'mm'
             );
+        } catch(e) {
+            setTextContentOnElement(document.getElementById('snow-1h'));
+        }
+
+        // Snow 3H
+        try {
             setTextContentOnElement(
                 document.getElementById('snow-3h'),
                 temperatureUnit.key == 'imperial' ? convertUnit(weatherData.snow['3h'], 'mm', 'in').toFixed(2) : weatherData.snow['3h'],
                 temperatureUnit.key == 'imperial' ? 'in': 'mm'
             );
+        } catch(e) {
+            setTextContentOnElement(document.getElementById('snow-3h'));
         }
 
         // Datetime
@@ -449,34 +413,6 @@ const weatherApp = (() => {
     }
     
     function init() {
-        // Search form submit handler
-        if (searchForm) {
-            searchForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-    
-                const searchInput = searchForm.querySelector('[name="search"]');
-                const unitsSelect = searchForm.querySelector('[name="units"]');
-
-                if (unitsSelect) {
-                    setTemperatureUnit(TemperatureUnits[unitsSelect.value]);
-                }
-
-                if (searchInput) {
-                    openWeatherMapAPI.fetchWithSearch(searchInput.value, temperatureUnit.key)
-                        .then((data) => {
-                            console.log(data);
-                            // Display weather data if response is valid
-                            if ('cod' in data && data.cod === 200) {
-                                locationName = data.name;
-                                displayWeatherData(data);
-                            } else {
-                                // Response not valid
-                            }
-                        });
-                }
-            }, false);
-        }
-
         // Image - Wind Direction Arrow
         if (arrowRightImageElement) {
             const arrowRightImage = new Image();
@@ -491,22 +427,9 @@ const weatherApp = (() => {
             dayNightDial.init(dayNightImgContainer);
         }
 
-    
-        // Footer Component
-        document.body.appendChild(
-            new FooterComponent(2022, 'https://github.com/toddbrentlinger/odin-project-weather-app')
-                .render()
-        );
-
         // Use Geolocation API to get User's current position if available
         if ('geolocation' in navigator) {
             navigator.geolocation.getCurrentPosition((position) => {
-                const unitsSelect = searchForm.querySelector('[name="units"]');
-
-                if (unitsSelect) {
-                    setTemperatureUnit(TemperatureUnits[unitsSelect.value]);
-                }
-
                 openWeatherMapAPI.fetchWithGeolocation(position, temperatureUnit.key)
                     .then((data) => {
                         console.log(data);
@@ -522,7 +445,46 @@ const weatherApp = (() => {
         }
     }
 
+    function handleSearchFormSubmit(e) {
+        e.preventDefault();
+
+        setTemperatureUnit(TemperatureUnits[e.target.elements.units.value]);
+
+        openWeatherMapAPI.fetchWithSearch(e.target.elements.search.value, temperatureUnit.key)
+            .then((data) => {
+                console.log(data);
+                // Display weather data if response is valid
+                if ('cod' in data && data.cod === 200) {
+                    locationName = data.name;
+                    displayWeatherData(data);
+                } else {
+                    // Response not valid
+                }
+            });
+    }
+
+    /**
+     * 
+     * @param {HTMLElement} containerElement 
+     */
+    function render(containerElement) {
+        containerElement.append(
+            new HeaderComponent({
+                title: 'Weather App',
+            }).render(),
+            new TopNavComponent({
+                temperatureUnits: TemperatureUnits,
+                handleSubmit: handleSearchFormSubmit,
+            }).render(),
+            new FooterComponent({
+                copyrightYear: 2022, 
+                sourceCodeURL: 'https://github.com/toddbrentlinger/odin-project-weather-app',
+            }).render()
+        );
+    }
+
     return {
+        render,
         init,
         get locationName() { return locationName; },
         openWeatherMapAPI,
