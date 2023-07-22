@@ -6,7 +6,7 @@ import DayNightDialPNG from "./img/imgbin-day-night-alpha.png";
  * @returns {Object}
  */
 function createDayNightDial() {
-    let _containerElement, _imgElement, _sunriseElement, _sunsetElement;
+    let _imgElement, _sunriseElement, _sunsetElement;
 
     /**
      * Sets transform rotation angle of day-night dial image.
@@ -52,18 +52,17 @@ function createDayNightDial() {
     };
 
     /**
-     * Adds day-night dial elements to parent element.
-     * @param {HTMLElement} element 
+     * Creates and returns day-night dial element.
+     * @returns {HTMLElement} 
      */
-    const init = (element) => {
-        _containerElement = element;
-        _containerElement.id = 'sunrise-sunset-container';
+    const render = () => {
+        const element = createElement('div', {id: 'sunrise-sunset-container'});
 
         // Image
         _imgElement = createElement('img', {src: DayNightDialPNG, alt: 'Time of day dial'});
 
         // Image container
-        _containerElement.appendChild(
+        element.appendChild(
             createElement('div', {id: 'day-night-img-container'}, 
                 _imgElement
             )
@@ -72,7 +71,7 @@ function createDayNightDial() {
         _sunriseElement = createElement('span', {id: 'sys-sunrise'});
         _sunsetElement = createElement('span', {id: 'sys-sunset'});
 
-        _containerElement.appendChild(
+        element.appendChild(
             createElement('div', {id: 'sunrise-sunset-time-container'}, 
                 createElement('div', {}, 
                     createElement('span', {}, 'Sunrise'),
@@ -84,10 +83,12 @@ function createDayNightDial() {
                 )
             )
         );
+
+        return element;
     };
 
     return {
-        init,
+        render,
         update,
     };
 }
