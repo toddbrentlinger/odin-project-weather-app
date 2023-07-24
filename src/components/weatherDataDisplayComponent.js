@@ -2,6 +2,7 @@ import { capitalize, createElement, getDateWithTimezoneOffet } from "../utilitie
 import { convertUnit } from "../unitConverter";
 import createDayNightDial from "../dayNightDial";
 import createWindDial from "../windDial";
+import createRainSnowComponent from "./rainSnowComponent";
 
 const weatherDataDisplayComponent = (() => {
     const TemperatureUnits = {
@@ -59,11 +60,10 @@ const weatherDataDisplayComponent = (() => {
     const groundLevelPressure = createElement('span', {id: 'main-grnd-level'});
     const visibility = createElement('span', {id: 'visibility'});
     const clouds = createElement('span', {id: 'clouds'});
-    const rain1H = createElement('span', {id: 'rain-1h'});
-    const rain3H = createElement('span', {id: 'rain-3h'});
-    const snow1H = createElement('span', {id: 'snow-1h'});
-    const snow3H = createElement('span', {id: 'snow-3h'});
     const dt = createElement('span', {id: 'dt'});
+
+    const rainSection = createRainSnowComponent('rain');
+    const snowSection = createRainSnowComponent('snow');
 
     const dayNightDial = createDayNightDial();
     const windDial = createWindDial();
@@ -269,56 +269,14 @@ const weatherDataDisplayComponent = (() => {
         windDial.update(weatherData.wind, temperatureUnit.speed.abbreviation);
 
         // Rain
-
-        // Rain 1H
-        try {
-            setTextContentOnElement(
-                rain1H,
-                temperatureUnit.key == 'imperial' ? convertUnit(weatherData.rain['1h'], 'mm', 'in').toFixed(2) : weatherData.rain['1h'],
-                temperatureUnit.key == 'imperial' ? 'in': 'mm'
-            );
-        } catch(e) {
-            setTextContentOnElement(rain1H);
-        }
-
-        // Rain 3H
-        try {
-            setTextContentOnElement(
-                rain3H,
-                temperatureUnit.key == 'imperial' ? convertUnit(weatherData.rain['3h'], 'mm', 'in').toFixed(2) : weatherData.rain['3h'],
-                temperatureUnit.key == 'imperial' ? 'in': 'mm'
-            );
-        } catch(e) {
-            setTextContentOnElement(rain3H);
-        }
+        rainSection.update(weatherData.rain || undefined, temperatureUnit.key);
 
         // Snow
-
-        // Snow 1H
-        try {
-            setTextContentOnElement(
-                snow1H,
-                temperatureUnit.key == 'imperial' ? convertUnit(weatherData.snow['1h'], 'mm', 'in').toFixed(2) : weatherData.snow['1h'],
-                temperatureUnit.key == 'imperial' ? 'in': 'mm'
-            );
-        } catch(e) {
-            setTextContentOnElement(snow1H);
-        }
-
-        // Snow 3H
-        try {
-            setTextContentOnElement(
-                snow3H,
-                temperatureUnit.key == 'imperial' ? convertUnit(weatherData.snow['3h'], 'mm', 'in').toFixed(2) : weatherData.snow['3h'],
-                temperatureUnit.key == 'imperial' ? 'in': 'mm'
-            );
-        } catch(e) {
-            setTextContentOnElement(snow3H);
-        }
+        snowSection.update(weatherData.snow || undefined, temperatureUnit.key);
     }
 
     function render() {
-        const mainElement = document.createElement('div');
+        const element = createElement('article', {id: 'current-weather'});
 
         // Main temperature Section
 
@@ -371,34 +329,6 @@ const weatherDataDisplayComponent = (() => {
             ),
         );
 
-        // Rain
-
-        const rainSection = createElement('section', {id: 'rain-section'}, 
-            createElement('h2', {}, 'Rain'),
-            createElement('div', {}, 
-                createElement('span', {}, 'Rain 1H: '),
-                rain1H
-            ),
-            createElement('div', {}, 
-                createElement('span', {}, 'Rain 3H: '),
-                rain3H
-            ),
-        );
-
-        // Snow
-
-        const snowSection = createElement('section', {id: 'snow-section'}, 
-            createElement('h2', {}, 'Snow'),
-            createElement('div', {}, 
-                createElement('span', {}, 'Snow 1H: '),
-                snow1H
-            ),
-            createElement('div', {}, 
-                createElement('span', {}, 'Snow 3H: '),
-                snow3H
-            ),
-        );
-
         // Last Updated
 
         const lastUpdatedSection = createElement('section', {id: 'last-updated'}, 
@@ -406,7 +336,7 @@ const weatherDataDisplayComponent = (() => {
             dt
         );
 
-        mainElement.append(
+        element.append(
             name,
             timezone,
             createElement('hr'),
@@ -414,13 +344,13 @@ const weatherDataDisplayComponent = (() => {
             weatherDetailSection, 
             dayNightDial.render(), 
             windDial.render(),
-            rainSection,
-            snowSection,
+            rainSection.render(),
+            snowSection.render(),
             createElement('hr'),
             lastUpdatedSection,
         );
 
-        return mainElement;
+        return element;
     }
 
     return {
