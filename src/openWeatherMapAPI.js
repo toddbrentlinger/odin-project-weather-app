@@ -4,9 +4,10 @@ const openWeatherMapAPI = (() => {
     /**
      * 
      * @param {String} searchInputValue 
+     * @param {String|null} temperatureUnitKey 
      * @returns {String}
      */
-    function createFetchURL(searchInputValue, temperatureUnitKey = null) {
+    function createFetchCurrentURL(searchInputValue, temperatureUnitKey = null) {
         let url = `http://api.openweathermap.org/data/2.5/weather?q=${searchInputValue}&APPID=${openWeatherMapKey}`;
 
         if (temperatureUnitKey) {
@@ -18,10 +19,22 @@ const openWeatherMapAPI = (() => {
 
     /**
      * 
-     * @param {GeolocationPosition} geolocationPositon 
+     * @param {String} searchInputValue 
      * @returns {String}
      */
-    function createFetchURLWithGeolocationPosition(geolocationPositon, temperatureUnitKey = null) {
+    function createFetchGeolocationURL(searchInputValue) {
+        let url = `http://api.openweathermap.org/geo/1.0/direct?q=${searchInputValue}&limit=5&APPID=${openWeatherMapKey}`;
+
+        return url;
+    }
+
+    /**
+     * 
+     * @param {GeolocationPosition} geolocationPositon 
+     * @param {String|null} temperatureUnitKey 
+     * @returns {String}
+     */
+    function createFetchCurrentURLWithGeolocationPosition(geolocationPositon, temperatureUnitKey = null) {
         let url = `http://api.openweathermap.org/data/2.5/weather?`;
 
         // Lat
@@ -41,19 +54,54 @@ const openWeatherMapAPI = (() => {
         return url;
     }
 
-    async function fetchWithSearch(searchInputValue, temperatureUnitKey = null) {
-        return fetch(createFetchURL(searchInputValue, temperatureUnitKey), { mode: 'cors', })
+    /**
+     * 
+     * @param {String} searchInputValue 
+     * @returns {Promise}
+     */
+    async function fetchGeolocationWithSearch(searchInputValue) {
+        return fetch(createFetchGeolocationURL(searchInputValue))
             .then((response) => response.json());
     }
 
-    async function fetchWithGeolocation(geolocationPositon, temperatureUnitKey = null) {
-        return fetch(createFetchURLWithGeolocationPosition(geolocationPositon, temperatureUnitKey), { mode: 'cors', })
+    /**
+     * 
+     * @param {String} searchInputValue 
+     * @param {String|null} temperatureUnitKey 
+     * @returns {Promise}
+     */
+    async function fetchCurrentWithSearch(searchInputValue, temperatureUnitKey = null) {
+        return fetch(createFetchCurrentURL(searchInputValue, temperatureUnitKey), { mode: 'cors', })
+            .then((response) => response.json());
+    }
+
+    /**
+     * 
+     * @param {String} searchInputValue 
+     * @param {String|null} temperatureUnitKey 
+     * @returns {Promise}
+     */
+    async function fetchCurrentWithGeolocation(geolocationPositon, temperatureUnitKey = null) {
+        return fetch(createFetchCurrentURLWithGeolocationPosition(geolocationPositon, temperatureUnitKey), { mode: 'cors', })
+            .then((response) => response.json());
+    }
+
+    async function fetch5DayForecast(lat, lon) {
+        return fetch(`http://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${openWeatherMapKey}`, { mode: 'cors'})
+            .then((response) => response.json());
+    }
+
+    async function fetch5DayForecastWithSearch(searchInputValue) {
+        return fetch(`http://api.openweathermap.org/data/2.5/forecast?q=${searchInputValue}&appid=${openWeatherMapKey}`, { mode: 'cors'})
             .then((response) => response.json());
     }
 
     return {
-        fetchWithSearch,
-        fetchWithGeolocation,
+        fetchGeolocationWithSearch,
+        fetchCurrentWithSearch,
+        fetchCurrentWithGeolocation,
+        fetch5DayForecast,
+        fetch5DayForecastWithSearch,
     };
 })();
 
