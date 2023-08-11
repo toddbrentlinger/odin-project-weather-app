@@ -8,7 +8,7 @@ const openWeatherMapAPI = (() => {
      * @returns {String}
      */
     function createFetchCurrentURL(searchInputValue, temperatureUnitKey = null) {
-        let url = `http://api.openweathermap.org/data/2.5/weather?q=${searchInputValue}&APPID=${openWeatherMapKey}`;
+        let url = `https://api.openweathermap.org/data/2.5/weather?q=${searchInputValue}&APPID=${openWeatherMapKey}`;
 
         if (temperatureUnitKey) {
             url += `&units=${temperatureUnitKey}`;
@@ -23,7 +23,7 @@ const openWeatherMapAPI = (() => {
      * @returns {String}
      */
     function createFetchGeolocationURL(searchInputValue) {
-        let url = `http://api.openweathermap.org/geo/1.0/direct?q=${searchInputValue}&limit=5&APPID=${openWeatherMapKey}`;
+        let url = `https://api.openweathermap.org/geo/1.0/direct?q=${searchInputValue}&limit=5&APPID=${openWeatherMapKey}`;
 
         return url;
     }
@@ -35,7 +35,7 @@ const openWeatherMapAPI = (() => {
      * @returns {String}
      */
     function createFetchCurrentURLWithGeolocationPosition(geolocationPositon, temperatureUnitKey = null) {
-        let url = `http://api.openweathermap.org/data/2.5/weather?`;
+        let url = `https://api.openweathermap.org/data/2.5/weather?`;
 
         // Lat
         url += `&lat=${geolocationPositon.coords.latitude}`;
@@ -87,12 +87,12 @@ const openWeatherMapAPI = (() => {
     }
 
     async function fetch5DayForecast(lat, lon) {
-        return fetch(`http://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${openWeatherMapKey}`, { mode: 'cors'})
+        return fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${openWeatherMapKey}`, { mode: 'cors'})
             .then((response) => response.json());
     }
 
     async function fetch5DayForecastWithSearch(searchInputValue) {
-        return fetch(`http://api.openweathermap.org/data/2.5/forecast?q=${searchInputValue}&appid=${openWeatherMapKey}`, { mode: 'cors'})
+        return fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${searchInputValue}&appid=${openWeatherMapKey}`, { mode: 'cors'})
             .then((response) => response.json());
     }
 
