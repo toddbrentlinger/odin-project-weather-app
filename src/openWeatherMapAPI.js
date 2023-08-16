@@ -1,14 +1,8 @@
 const openWeatherMapAPI = (() => {
     const openWeatherMapKey = '4e7cceafee56ebb58f598a6cdad1a909';
 
-    /**
-     * 
-     * @param {String} searchInputValue 
-     * @param {String|null} temperatureUnitKey 
-     * @returns {String}
-     */
-    function createFetchCurrentURL(searchInputValue, temperatureUnitKey = null) {
-        let url = `https://api.openweathermap.org/data/2.5/weather?q=${searchInputValue}&APPID=${openWeatherMapKey}`;
+    function createFetchURLWithSearch(searchInputValue, type = 'weather', temperatureUnitKey = null) {
+        let url = `https://api.openweathermap.org/data/2.5/${type}?q=${searchInputValue}&APPID=${openWeatherMapKey}`;
 
         if (temperatureUnitKey) {
             url += `&units=${temperatureUnitKey}`;
@@ -20,7 +14,28 @@ const openWeatherMapAPI = (() => {
     /**
      * 
      * @param {String} searchInputValue 
+     * @param {String|null} temperatureUnitKey 
      * @returns {String}
+     */
+    function createFetchCurrentURL(searchInputValue, temperatureUnitKey = null) {
+        return createFetchURLWithSearch(searchInputValue, 'weather', temperatureUnitKey);
+    }
+
+    /**
+     * 
+     * @param {String} searchInputValue 
+     * @param {String|null} temperatureUnitKey 
+     * @returns {String}
+     */
+    function createFetch5DayForecastURL(searchInputValue, temperatureUnitKey = null) {
+        return createFetchURLWithSearch(searchInputValue, 'forecast', temperatureUnitKey);
+    }
+
+    /**
+     * 
+     * @param {String} searchInputValue 
+     * @returns {String}
+     * @todo
      */
     function createFetchGeolocationURL(searchInputValue) {
         let url = `https://api.openweathermap.org/geo/1.0/direct?q=${searchInputValue}&limit=5&APPID=${openWeatherMapKey}`;
@@ -54,13 +69,34 @@ const openWeatherMapAPI = (() => {
         return url;
     }
 
+    function createFetch5DayForecastURLWithGeolocationPosition(geolocationPositon, temperatureUnitKey = null) {
+        let url = `https://api.openweathermap.org/data/2.5/forecast?`;
+
+        // Lat
+        url += `&lat=${geolocationPositon.coords.latitude}`;
+
+        // Lon
+        url += `&lon=${geolocationPositon.coords.longitude}`;
+
+        // App ID
+        url += `&APPID=${openWeatherMapKey}`;
+
+        // Units
+        if (temperatureUnitKey) {
+            url += `&units=${temperatureUnitKey}`;
+        }
+
+        return url;
+    }   
+
     /**
      * 
      * @param {String} searchInputValue 
      * @returns {Promise}
      */
-    async function fetchGeolocationWithSearch(searchInputValue) {
-        return fetch(createFetchGeolocationURL(searchInputValue))
+    async function fetchGeolocationWithSearch(searchInputValue, init = {}) {
+        init.mode = 'cors';
+        return fetch(createFetchGeolocationURL(searchInputValue), init)
             .then((response) => response.json());
     }
 
