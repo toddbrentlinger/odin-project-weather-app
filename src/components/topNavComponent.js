@@ -1,7 +1,42 @@
 import BaseComponent from "./baseComponent";
+import openWeatherMapAPI from "../openWeatherMapAPI";
 import { capitalize, createElement } from "../utilities";
 
 class TopNavComponent extends BaseComponent {
+    constructor(props) {
+        super(props);
+        this.controller = new AbortController();
+        this.signal = this.controller.signal;
+        this.isFetching = false;
+    }
+
+    handleChange(e) {
+        console.log('Search input changed!');
+        
+        // If currently fetching data, abort
+        if (this.isFetching) {
+            this.controller.abort();
+            this.isFetching = false;
+            console.log('Geolocation Fetch Aborted!');
+        }
+
+        // Return if search field is blank
+        if (!e.target.value) { return; }
+
+        try {
+            this.isFetching = true;
+            openWeatherMapAPI.fetchGeolocationWithSearch(e.target.value, {signal: this.signal})
+                .then((data) => {
+                    console.log('Geolocation Options:');
+                    console.log(data);
+                    this.isFetching = false;
+                });
+        } catch(e) {
+            console.error(`Fetch error: ${e.message}`);
+            this.isFetching = false;
+        }
+    }
+
     handleSubmit(e) {
         this.props.handleSubmit(e);
     }
@@ -20,6 +55,8 @@ class TopNavComponent extends BaseComponent {
             autofocus: true,
             required: true,
         });
+        
+        searchInput.addEventListener('input', this.handleChange.bind(this));
 
         const selectOptions = Object.entries(this.props.temperatureUnits)
             .map(([key, obj]) => {
