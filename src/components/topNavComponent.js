@@ -5,40 +5,68 @@ import { capitalize, createElement } from "../utilities";
 class TopNavComponent extends BaseComponent {
     constructor(props) {
         super(props);
-        this.controller = new AbortController();
-        this.signal = this.controller.signal;
+        this.controller;
         this.isFetching = false;
+        this.geolocationListElement;
     }
 
-    handleChange(e) {
-        console.log('Search input changed!');
-        
+    async handleChange(e) {
         // If currently fetching data, abort
         if (this.isFetching) {
             this.controller.abort();
             this.isFetching = false;
-            console.log('Geolocation Fetch Aborted!');
         }
 
         // Return if search field is blank
-        if (!e.target.value) { return; }
+        if (!e.target.value) { 
+            this.emptyGeolocationListElement();
+            return; 
+        }
 
         try {
+            this.controller = new AbortController();
             this.isFetching = true;
-            openWeatherMapAPI.fetchGeolocationWithSearch(e.target.value, {signal: this.signal})
+            await openWeatherMapAPI.fetchGeolocationWithSearch(e.target.value, {signal: this.controller.signal})
                 .then((data) => {
-                    console.log('Geolocation Options:');
-                    console.log(data);
+                    this.updateGeolocationListElement(data);
                     this.isFetching = false;
                 });
         } catch(e) {
-            console.error(`Fetch error: ${e.message}`);
             this.isFetching = false;
+            this.emptyGeolocationListElement();
         }
     }
 
     handleSubmit(e) {
         this.props.handleSubmit(e);
+        this.emptyGeolocationListElement();
+    }
+
+    createGeolocationOptionListElement(geolocationOptionData) {
+        const listElement = createElement('li', {}, 
+            `${geolocationOptionData.name}, ${geolocationOptionData.country}`,
+        );
+
+        listElement.addEventListener('click', () => {
+            this.props.handleGeolocationSelect(geolocationOptionData.lat, geolocationOptionData.lon);
+        });
+
+        return listElement;
+    }
+
+    emptyGeolocationListElement() {
+        while (this.geolocationListElement.firstChild) {
+            this.geolocationListElement.removeChild(this.geolocationListElement.firstChild);
+        }
+    }
+
+    updateGeolocationListElement(geolocationOptionArr) {
+        this.emptyGeolocationListElement();
+
+        // Create list elements and append to unordered list
+        this.geolocationListElement.append(
+            ...geolocationOptionArr.map((geolocationOption) => this.createGeolocationOptionListElement(geolocationOption))
+        );
     }
     
     render() {
@@ -61,9 +89,7 @@ class TopNavComponent extends BaseComponent {
         const selectOptions = Object.entries(this.props.temperatureUnits)
             .map(([key, obj]) => {
                 let str = `${capitalize(key)} (`;
-                // if (value.key) {
-                //     str += '&deg;';
-                // }
+                
                 str += `${obj.temperature.abbreviation}, ${obj.speed.abbreviation})`; 
                 
                 const optionElement = createElement('option', {value: key}, str);
@@ -103,6 +129,14 @@ class TopNavComponent extends BaseComponent {
         );
 
         this.element.appendChild(form);
+
+        // Geolocation list element
+        this.geolocationListElement = createElement('ul', {id: 'geolocation-options-list'});
+        this.element.appendChild(
+            createElement('div', {id: 'geolocation-options-list-container'}, 
+                this.geolocationListElement
+            )
+        );
 
         return this.element;
     }

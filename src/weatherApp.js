@@ -10,7 +10,7 @@ const weatherApp = (() => {
         // Use Geolocation API to get User's current position if available
         if ('geolocation' in navigator) {
             navigator.geolocation.getCurrentPosition((position) => {
-                openWeatherMapAPI.fetchCurrentWithGeolocation(position, weatherDataDisplayComponent.temperatureUnit.key)
+                openWeatherMapAPI.fetchCurrentWithGeolocation(position.coords.latitude, position.coords.longitude, weatherDataDisplayComponent.temperatureUnit.key)
                     .then((data) => {
                         console.log(data);
                         // Display weather data if response is valid
@@ -29,6 +29,7 @@ const weatherApp = (() => {
 
         weatherDataDisplayComponent.setTemperatureUnit(e.target.elements.units.value);
 
+        // Current Weather
         openWeatherMapAPI.fetchCurrentWithSearch(e.target.elements.search.value, weatherDataDisplayComponent.temperatureUnit.key)
             .then((data) => {
                 console.log(data);
@@ -40,9 +41,16 @@ const weatherApp = (() => {
                 }
             });
 
-        openWeatherMapAPI.fetch5DayForecastWithSearch(e.target.elements.search.value)
+        // Geolocation
+        // openWeatherMapAPI.fetchGeolocationWithSearch(e.target.elements.search.value)
+        //     .then((data) => {
+        //         console.log(data);
+        //     });
+
+        // 5-Day/3-Hour forecast
+        openWeatherMapAPI.fetch5DayForecastWithSearch(e.target.elements.search.value, weatherDataDisplayComponent.temperatureUnit.key)
             .then((data) => {
-                if ('cod' in data && data.cod === 200) {
+                if ('cod' in data && data.cod === '200') {
                     data.list = data.list.map((item) => {
                         const datetime = new Date(item.dt * 1000);
                         item.dt2 = getDateWithTimezoneOffet(item.dt, data.city.timezone, datetime.getTimezoneOffset());
@@ -68,6 +76,9 @@ const weatherApp = (() => {
             new TopNavComponent({
                 temperatureUnits: weatherDataDisplayComponent.getAllTemperatureUnits(),
                 handleSubmit: handleSearchFormSubmit,
+                handleGeolocationSelect: (lat, lon) => {
+                    console.log(`Select Geolocation: \nlat: ${lat}\nlon: ${lon}`);
+                },
             }).render(),
             createElement('main', {}, 
                 weatherDataDisplayComponent.render(),
